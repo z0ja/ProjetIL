@@ -10,7 +10,6 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // 1. Recherche de l'utilisateur
         const query = 'SELECT * FROM users WHERE email = $1';
         const result = await db.query(query, [email]);
 
@@ -36,7 +35,7 @@ const login = async (req, res) => {
 
         // 4. Envoi de la réponse
         res.json({
-            message: "Connexion réussie (via login.js) !",
+            message: "Connexion réussie !",
             token: token,
             user: { id: user.id, username: user.username }
         });

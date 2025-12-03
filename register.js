@@ -1,5 +1,4 @@
-// Fichier : register.js
-const db = require('./db');       // On a besoin de la BDD
+const db = require('./db');      
 const bcrypt = require('bcrypt'); // On a besoin de bcrypt pour hasher
 
 const register = async (req, res) => {
@@ -21,7 +20,7 @@ const register = async (req, res) => {
 
         // 3. Réponse succès
         res.status(201).json({ 
-            message: "Utilisateur inscrit (via fichier séparé) !", 
+            message: "Utilisateur inscrit !", 
             user: result.rows[0] 
         });
 
