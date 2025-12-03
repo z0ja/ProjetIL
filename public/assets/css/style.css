@@ -1,0 +1,64 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+  --primaryColor: hsl(204,100%,33%);
+  --secondaryColor: hsl(213,69%,62%);
+  --hoverColor: hsl(205,100%,81%);
+  --paleColor: hsl(167,39%,93%);
+  --whiteColor: hsl(0, 0%, 100%);
+  --blackColor: hsl(0, 0%, 18%);
+  --textColor: hsl(20,17%,10.4%);
+  --greyText: hsl(240,3.4%,5.7%);
+  --bgColor: hsl(113, 11%, 85%);
+  --inputColor: hsl(330, 12%, 97%);
+  --inputtColor: hsl(154, 14%, 90%);
+  --biggestFontSize: 2.5rem;
+  --h1FontSize: 1.5rem;
+  --h2FontSize: 1.25rem;
+  --h3FontSize: 1rem;
+  --normalFontSize: 0.938rem;
+  --smallFontSize: 0.813rem;
+  --smallestFontSize: 0.75rem;
+  --footerFontSize: 0.65rem;
+}
+
+body {
+  background: var(--blackColor);
+  overflow-x: hidden;
+}
+
+.bgPrim {
+  background: var(--primaryColor);
+}
+
+.bgSec {
+  background: var(--secondaryColor);
+}
+
+.bgWhite {
+  background: var(--whiteColor);
+}
+
+.bgPale {
+  background: var(--paleColor);
+}
+
+.colorPrim {
+  color: var(--primaryColor);
+}
+
+.colorSec {
+  color: var(--secondaryColor);
+}
+
+.colorPale {
+  color: var(--paleColor);
+}
+
+a {
+  text-decoration: none;
+}
