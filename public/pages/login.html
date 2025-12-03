@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="../assets/css/styles.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap" rel="stylesheet">
+    
+    <title>Connexion - W2G</title>
+</head>
+<body class="mx-5 mx-md-4">
+    
+    <nav class="navbar container">
+        <a class="navbar-brand" href="#">W2G</a>
+        <div class="">
+            <ul class="navbar-nav d-flex flex-row gap-3">
+                <li class="nav-item">
+                    <a  class="nav-link" href="index.html">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Room</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="login.html">Connexion</a>
+                </li>
+                <li class="nav-item d-sm-none">
+                    <a class="nav-link" href="signup.html">S'inscrire</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="container justify-content-center">
+        <h1 class="text-center">
+            Connexion à W2G
+        </h1>
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <p class="text-center fs-4 mt-3">
+                    Connectez-vous pour accéder à vos rooms et regarder des vidéos en synchronisation avec vos amis.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form>
+                    <div class="mb-3">
+                        <label for="loginName" class="form-label">Nom d'utilisateur</label>
+                        <input type="text" class="form-control" id="signupName" placeholder="Votre nom d'utilisateur" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loginPassword" class="form-label">Mot de passe</label>
+                        <input type="password" class="form-control" id="loginPassword" placeholder="Votre mot de passe" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Se souvenir de moi</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Se connecter</button>
+                    <div class="text-center mt-3">
+                        <a href="register.html">Pas encore de compte ? S'inscrire</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="container">
+        <div>
+            <hr>
+        </div>
+        <div class="container text-center py-4">
+            <p>&copy; 2024 W2G. Tous droits réservés.</p>
+        </div>
+    </footer>
+    
+    <!-- JS Files -->
+    <script src="../assets/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/jquery.sticky.js"></script>
+    <script src="../assets/js/click-scroll.js"></script>
+    <script src="../assets/js/alphabet-scroll.js"></script>
+    <script src="../assets/js/custom.js"></script>
+</body>
+</html>

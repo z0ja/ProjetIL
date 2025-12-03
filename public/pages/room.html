@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="../assets/css/styles.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap" rel="stylesheet">
+    
+    <title>Room - W2G</title>
+</head>
+<body class="mx-5 mx-md-4">
+    
+    <nav class="navbar container">
+        <a class="navbar-brand" href="#">W2G</a>
+        <div class="">
+            <ul class="navbar-nav d-flex flex-row gap-3">
+                <li class="nav-item">
+                    <a  class="nav-link" href="index.html">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="room.html">Room</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="login.html">Connexion</a>
+                </li>
+                <li class="nav-item d-sm-none">
+                    <a class="nav-link" href="signup.html">S'inscrire</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="container justify-content-center">
+        <h1 class="text-center">
+            Room : Regardez ensemble !
+        </h1>
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <p class="text-center fs-4 mt-3">
+                    Synchronisez votre visionnage avec vos amis. Partagez le lien de la room pour inviter d'autres personnes.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="row">
+            <!-- Lecteur vidéo principal -->
+            <div class="col-lg-8">
+                <div class="ratio ratio-16x9 mb-4">
+                    <!-- Placeholder pour un lecteur vidéo (e.g., YouTube embed) -->
+                    <iframe id="videoPlayer" src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1" title="Lecteur vidéo W2G" allowfullscreen></iframe>
+                </div>
+                <!-- Contrôles de lecture (simulés, à synchroniser via JS/WebSockets) -->
+                <div class="d-flex justify-content-center gap-3 mb-4">
+                    <button class="btn btn-primary" id="playBtn"><i class="bi bi-play-fill"></i> Play</button>
+                    <button class="btn btn-secondary" id="pauseBtn"><i class="bi bi-pause-fill"></i> Pause</button>
+                    <button class="btn btn-info" id="syncBtn"><i class="bi bi-arrow-clockwise"></i> Synchroniser</button>
+                </div>
+                <!-- Champ pour changer de vidéo -->
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="videoUrl" placeholder="Collez l'URL d'une vidéo YouTube ou sélectionnez dans la bibliothèque">
+                    <button class="btn btn-outline-secondary" id="loadVideoBtn">Charger</button>
+                </div>
+            </div>
+            
+            <!-- Sidebar : Chat et participants -->
+            <div class="col-lg-4">
+                <!-- Liste des participants -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Participants (3)</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Vous (Hôte)</li>
+                            <li class="list-group-item">Ami1</li>
+                            <li class="list-group-item">Ami2</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Chat en temps réel -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Chat</h5>
+                    </div>
+                    <div class="card-body" style="height: 300px; overflow-y: auto;" id="chatMessages">
+                        <!-- Messages simulés -->
+                        <div class="mb-2"><strong>Vous :</strong> Salut tout le monde !</div>
+                        <div class="mb-2"><strong>Ami1 :</strong> Prêt à regarder ?</div>
+                        <div class="mb-2"><strong>Ami2 :</strong> Oui, lançons la vidéo !</div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="chatInput" placeholder="Tapez votre message...">
+                            <button class="btn btn-primary" id="sendBtn">Envoyer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="container">
+        <div>
+            <hr>
+        </div>
+        <div class="container text-center py-4">
+            <p>&copy; 2024 W2G. Tous droits réservés.</p>
+        </div>
+    </footer>
+    
+    <!-- JS Files -->
+    <script src="../assets/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/jquery.sticky.js"></script>
+    <script src="../assets/js/click-scroll.js"></script>
+    <script src="../assets/js/alphabet-scroll.js"></script>
+    <script src="../assets/js/custom.js"></script>
+    <script src="../assets/js/room.js"></script>
+</body>
+</html>
