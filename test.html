@@ -19,7 +19,7 @@
 
       var pause = true;
       var previousTime = 0;
-      var admin = false
+      var admin = false;
 
       // 3. This function creates an <iframe> (and YouTube player)
       //    after the API code downloads.
@@ -86,16 +86,29 @@
 
       function onPlayerStateChange(event) {
         if (event.data == YT.PlayerState.PLAYING) {
-          console.log("video lancer");
+          if(pause){
+            console.log("video lancer");
+            pause = false;
+          }
           var interval = setInterval(changeTime,1000);
         } else {
-          console.log("video en pause");
+          if(!pause){
+            console.log("video en pause");
+            pause = true;
+          }
           clearInterval(interval);
         }
       }
 
+      function cutUrl(url){
+        url = url.split("=");
+        console.log(url[1]);
+        return url[1];
+      }
+
       function changeVideo(){
         var url = document.getElementById("url").value;
+        url = cutUrl(url);
         player.loadVideoById(url);
       }
     </script>
