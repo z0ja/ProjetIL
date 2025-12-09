@@ -4,7 +4,7 @@ const pool = new Pool({
     user: 'uapv2402499',
     host: 'pedago.univ-avignon.fr',
     database: 'etd',
-    password: 'tWKO5X', // Le mot de passe qu'on vient de définir
+    password: 'tWKO5X',
     port: 5432,
 });
 

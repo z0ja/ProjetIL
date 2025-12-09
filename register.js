@@ -1,16 +1,13 @@
-// Fichier : register.js
-const db = require('./db');       // On a besoin de la BDD
+const db = require('./db');      
 const bcrypt = require('bcrypt'); // On a besoin de bcrypt pour hasher
 
 const register = async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
-        // 1. Hash du mot de passe
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // 2. Insertion BDD
         const query = `
             INSERT INTO users (username, email, password_hash) 
             VALUES ($1, $2, $3) 
@@ -21,7 +18,7 @@ const register = async (req, res) => {
 
         // 3. Réponse succès
         res.status(201).json({ 
-            message: "Utilisateur inscrit (via fichier séparé) !", 
+            message: "Utilisateur inscrit !", 
             user: result.rows[0] 
         });
 
@@ -34,5 +31,5 @@ const register = async (req, res) => {
     }
 };
 
-// TRES IMPORTANT : On exporte la fonction pour que server.js puisse l'utiliser
+// On exporte la fonction pour que server.js puisse l'utiliser
 module.exports = register;
