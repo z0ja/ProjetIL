@@ -1,10 +1,24 @@
 const db = require('./db');
 
+
+function extractVideoID(url) {
+    try {
+        // Cette expression régulière (Regex) cherche ce qu'il y a après "v=" ou "youtu.be/"
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+
+        return (match && match[2].length === 11) ? match[2] : null;
+    } catch (e) {
+        return null; 
+    }
+}
+
 const addToHistory = async (req, res) => {
 // On prend l'ID depuis le Token
     const userId = req.user.id; 
     // On ne récupère que les infos de la vidéo dans le body
     const { videoUrl, videoTitle } = req.body;
+    const youtubeId = extractVideoID(videoUrl);
     try {
         let videoId;
  
@@ -14,8 +28,10 @@ const addToHistory = async (req, res) => {
             videoId = checkVideo.rows[0].id;
         } else {
             const newVideo = await db.query(
-                'INSERT INTO videos (url, title) VALUES ($1, $2) RETURNING id',
-                [videoUrl, videoTitle]
+                `INSERT INTO videos (url, title, youtube_id) 
+                 VALUES ($1, $2, $3) 
+                 RETURNING id`,
+                [videoUrl, videoTitle, youtubeId]
             );
             videoId = newVideo.rows[0].id;
         }

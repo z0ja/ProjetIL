@@ -7,6 +7,7 @@ const register = require('./register');
 const login = require('./login');
 const history = require('./history');
 const authenticateToken = require('./Middleware'); 
+const checkAdmin = require('./adminMiddleware');
 
 // --- 2. MIDDLEWARE (Indispensable pour lire le JSON) ---
 app.use(express.json());
@@ -27,12 +28,15 @@ app.get('/test-db', async (req, res) => {
 app.post('/register', register);
 app.post('/login', login);
 
-// Routes Historique (Simplifiées, sans sécurité pour l'instant)
-app.post('/history', authenticateToken, history.addToHistory); // Ajouter
-app.get('/history', authenticateToken, history.getHistory);    // Lire
+app.post('/history', authenticateToken, history.addToHistory); 
+app.get('/history', authenticateToken, history.getHistory);   
 
-// --- 5. DÉMARRAGE ---
+
 const PORT = 3000;
+
+app.delete('/admin/delete-video', authenticateToken, checkAdmin, (req, res) => {
+    res.json({ message: "SUPPRESSION RÉUSSIE ! (Seul un admin peut voir ça)" });
+});
 app.listen(PORT, () => {
     console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
