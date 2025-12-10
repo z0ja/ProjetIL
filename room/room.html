@@ -7,13 +7,26 @@
     <body>
 		<h1>room des utilisateurs</h1>
 
+		<p id="servertest"></p>
+		<p>wtf</p>
 		<h2>nombre d'utilisateurs connectés: </h2>
-		<script src="/socket.io/socket.io.js"></script>
-		<script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+
+let test = "";
+
 
 const socket = io();
+socket.emit('test', 'message');
+socket.on('servertest', (arg) => {
+    document.getElementById('servertest').innerHTML = arg;
+});
 
-		</script>
+//window.onload = function(test){
+//    document.getElementById('servertest').innerHTML = test;
+//};
+
+</script>
     </body>
 </html>
 

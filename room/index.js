@@ -10,12 +10,24 @@ const io = new Server(server);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+let roomId;
+let roomName;
+const participant = [];
+
 app.get('/', (req, res) => {
 	res.sendFile(join(__dirname, 'room.html'));
 });
 
 io.on('connection', (socket) => {
+	// lors de la connexion d'un utilisateur
 	console.log('a user connected');
+	participant.push(socket);
+	console.log(participant);
+	socket.emit('servertest', 'coucou ^^');
+	socket.on('test', (arg) => {
+		console.log(arg);
+	});
+	// lors de la déconnexion d'un utilisateur
 	socket.on('disconnect', () => {
 		console.log('user disconnected');
 	});
