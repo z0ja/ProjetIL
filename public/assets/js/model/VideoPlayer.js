@@ -28,7 +28,7 @@ export class VideoPlayer {
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         this.admin = false; //temporaire
-        this.pause = true; //temporaire
+        this.pause__ = true; //temporaire
 
         let id;
         if (video === null) id = '';
@@ -68,35 +68,35 @@ export class VideoPlayer {
 
     onPlayerStateChange(event){ // currentState a changer
         if (event.data == YT.PlayerState.PLAYING) {
-          if(this.pause){
+          if(this.pause_){
             console.log("video lancer");
-            this.pause = false;
+            this.pause_ = false;
           }
-          this.interval = setInterval(this.changeTime,1000);
+          this.interval = setInterval(() => this.changeTime(),1000);
         } else {
-          if(!this.pause){
+          if(!this.pause_){
             console.log("video en pause");
-            this.pause = true;
+            this.pause_ = true;
           }
           clearInterval(this.interval);
         }
     }
 
     changeTime() {
-        var time = player.getCurrentTime();
-        var diff = currentTime - this.currentTime;
+        var time = this.player.getCurrentTime();
+        var diff = time - this.currentTime;
 
         if (diff > 2) {
             console.log("temps avancer");
             if(!this.admin){
-            this.player.seekTo(this.currentTime,true);
+            this.seek(this.currentTime);
             time = this.currentTime;
             }
         } 
         else if (diff < -1) {
             console.log("temps reculer");
             if(!this.admin){
-            this.player.seekTo(this.currentTime,true);
+            this.seek(this.currentTime);
             time = this.currentTime;
             }
         }
@@ -113,7 +113,7 @@ export class VideoPlayer {
     }
 
     seek(time){ // currentState a changer
-
+        this.player.seekTo(time,true);
     }
 
     loadVideo(video){

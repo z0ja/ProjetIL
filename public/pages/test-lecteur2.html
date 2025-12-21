@@ -7,9 +7,13 @@
 </head>
 <body>
     <div id="player"></div>
+    <button onclick="player.pause()">Pause</button>
+    <button onclick="player.play()">Play</button>
     <script type="module">
         import {VideoPlayer} from "../assets/js/model/VideoPlayer.js";
-        var player = new VideoPlayer();
+        import {Video} from "../assets/js/model/Video.js"
+        let video = new Video("M7lc1UVf-VE","test","test")
+        window.player = new VideoPlayer(video);
     </script>
 </body>
 </html>
