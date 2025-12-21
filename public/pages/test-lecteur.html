@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+    <div id="player"></div>
+    <button onclick="pauseVideo()">Pause</button>
+    <button onclick="playVideo()">Play</button>
+    <button onclick="pauseVideo2()">Pause2</button>
+    <input type="text" id="url">
+    <button onclick="changeVideo()">changer video</button>
+
+    <script>
+      // 2. This code loads the IFrame Player API code asynchronously.
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      var pause = true;
+      var previousTime = 0;
+      var admin = false;
+
+      // 3. This function creates an <iframe> (and YouTube player)
+      //    after the API code downloads.
+      var player;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: '390',
+          width: '640',
+          videoId: '',
+          playerVars: {
+            'playsinline': 1
+          },
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          },
+        });
+      }
+
+      function onPlayerReady(event) {
+        // event.target.playVideo();
+      }
+
+      function pauseVideo() {
+        player.pauseVideo();
+      }
+
+      function playVideo(){
+        player.playVideo()
+      }
+
+      function pauseVideo2() {
+        if(!pause){
+          player.pauseVideo();
+          pause = true;
+        }
+        else{
+          player.playVideo();
+          pause = false;
+        }
+      }
+
+      function changeTime() {
+        var currentTime = player.getCurrentTime();
+        var diff = currentTime - previousTime;
+
+        if (diff > 2) {
+          console.log("temps avancer");
+          if(!admin){
+            player.seekTo(previousTime,true);
+            currentTime = previousTime;
+          }
+        } 
+        else if (diff < -1) {
+          console.log("temps reculer");
+          if(!admin){
+            player.seekTo(previousTime,true);
+            currentTime = previousTime;
+          }
+        }
+
+        previousTime = currentTime;
+      }
+
+      function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.PLAYING) {
+          if(pause){
+            console.log("video lancer");
+            pause = false;
+          }
+          var interval = setInterval(changeTime,1000);
+        } else {
+          if(!pause){
+            console.log("video en pause");
+            pause = true;
+          }
+          clearInterval(interval);
+        }
+      }
+
+      function cutUrl(url){
+        url = url.split("=");
+        console.log(url[1]);
+        return url[1];
+      }
+
+      function changeVideo(){
+        var url = document.getElementById("url").value;
+        url = cutUrl(url);
+        player.loadVideoById(url);
+      }
+    </script>
+  </body>
+</html>

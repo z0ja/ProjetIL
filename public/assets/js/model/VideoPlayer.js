@@ -1,0 +1,130 @@
+import {Video} from "./Video.js";
+import {PlayerState} from "./PlayerState.js";
+
+export class VideoPlayer {
+    /**
+     * 
+     * @param {Video} video 
+     * @param {PlayerState} player
+     */
+    constructor(video=null,player=null) {
+        console.log("test");
+        this.currentTime = 0;
+        this.currentVideo = video;
+
+        if((video !== null && !(video instanceof Video)) || (player !== null && !(player instanceof PlayerState))){
+            throw new Error("Constructor arguments types not corresponding with the given ones");
+        }
+
+        if(player === null && video === null) this.currentState = new PlayerState();
+        else if(player === null) this.currentState = new PlayerState(video.getVideoId()) ;
+        else this.currentState = player;
+
+        // create iframe player
+        var tag = document.createElement('script');
+
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        this.admin = false; //temporaire
+        this.pause = true; //temporaire
+
+        let id;
+        if (video === null) id = '';
+        else id = this.currentVideo.getVideoId();
+        
+        window.onYouTubeIframeAPIReady = () => {
+            this.initPlayer(id);
+        };
+        
+        if (!document.getElementById('youtube-api-script')) {
+            var tag = document.createElement('script');
+            tag.id = 'youtube-api-script';
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        } else if (window.YT && window.YT.Player) {
+            this.initPlayer(videoIdString);
+        }
+    }
+
+    initPlayer(videoId) {
+        this.player = new YT.Player('player', {
+            height: '390',
+            width: '640',
+            videoId: videoId,
+            playerVars: { 'playsinline': 1 },
+            events: {
+                'onReady': (event) => this.onPlayerReady(event),       // Arrow function pour garder le 'this'
+                'onStateChange': (event) => this.onPlayerStateChange(event) // Arrow function pour garder le 'this'
+            },
+        });
+    }
+
+    onPlayerReady(event){
+
+    }
+
+    onPlayerStateChange(event){ // currentState a changer
+        if (event.data == YT.PlayerState.PLAYING) {
+          if(this.pause){
+            console.log("video lancer");
+            this.pause = false;
+          }
+          this.interval = setInterval(this.changeTime,1000);
+        } else {
+          if(!this.pause){
+            console.log("video en pause");
+            this.pause = true;
+          }
+          clearInterval(this.interval);
+        }
+    }
+
+    changeTime() {
+        var time = player.getCurrentTime();
+        var diff = currentTime - this.currentTime;
+
+        if (diff > 2) {
+            console.log("temps avancer");
+            if(!this.admin){
+            this.player.seekTo(this.currentTime,true);
+            time = this.currentTime;
+            }
+        } 
+        else if (diff < -1) {
+            console.log("temps reculer");
+            if(!this.admin){
+            this.player.seekTo(this.currentTime,true);
+            time = this.currentTime;
+            }
+        }
+
+        this.currentTime = time;
+    }
+
+    play(){ // currentState a changer
+        this.player.playVideo()
+    }
+
+    pause(){ // currentState a changer
+        this.player.pauseVideo();
+    }
+
+    seek(time){ // currentState a changer
+
+    }
+
+    loadVideo(video){
+        if(!(video instanceof Video)){
+            throw new Error("Function arguments types not corresponding with the given ones")
+        }
+        this.currentVideo = video;
+        player.loadVideoById(this.currentVideo.getVideoId());
+    }
+
+    getState(){ // currentState a changer
+        return this.currentState;
+    }
+}
