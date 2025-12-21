@@ -28,7 +28,6 @@ export class VideoPlayer {
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         this.admin = false; //temporaire
-        this.pause__ = true; //temporaire
 
         let id;
         if (video === null) id = '';
@@ -66,17 +65,17 @@ export class VideoPlayer {
 
     }
 
-    onPlayerStateChange(event){ // currentState a changer
+    onPlayerStateChange(event){
         if (event.data == YT.PlayerState.PLAYING) {
-          if(this.pause_){
+          if(this.currentState.getStatus() === "paused"){
             console.log("video lancer");
-            this.pause_ = false;
+            this.currentState.setStatus("played");
           }
           this.interval = setInterval(() => this.changeTime(),1000);
         } else {
-          if(!this.pause_){
+          if(this.currentState.getStatus() === "played"){
             console.log("video en pause");
-            this.pause_ = true;
+            this.currentState.setStatus("paused");
           }
           clearInterval(this.interval);
         }
@@ -104,16 +103,19 @@ export class VideoPlayer {
         this.currentTime = time;
     }
 
-    play(){ // currentState a changer
-        this.player.playVideo()
+    play(){
+        this.player.playVideo();
+        //this.currentState.setStatus("played");
     }
 
-    pause(){ // currentState a changer
+    pause(){
         this.player.pauseVideo();
+        //this.currentState.setStatus("paused");
     }
 
-    seek(time){ // currentState a changer
+    seek(time){
         this.player.seekTo(time,true);
+        this.currentState.setTime(time);
     }
 
     loadVideo(video){
@@ -121,10 +123,11 @@ export class VideoPlayer {
             throw new Error("Function arguments types not corresponding with the given ones")
         }
         this.currentVideo = video;
-        player.loadVideoById(this.currentVideo.getVideoId());
+        this.currentState = new PlayerState(this.currentVideo.getVideoId());
+        this.player.loadVideoById(this.currentVideo.getVideoId());
     }
 
-    getState(){ // currentState a changer
+    getState(){
         return this.currentState;
     }
 }

@@ -32,7 +32,7 @@ export class PlayerState {
     }
 
     setStatus(status){
-        if(status !== "paused" && this.status !== "played"){
+        if(status !== "paused" && status !== "played"){
             throw new Error("status value not 'paused' or 'played'");
         }
         this.status = status;
