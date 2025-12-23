@@ -1,0 +1,78 @@
+const db = require('../db');
+const bcrypt = require('bcrypt');
+
+class Users {
+    // Constructeur On accepte username (pour register) mais il est optionnel (pour login)
+    constructor(email, password, username = null) {
+        this.userId = null;
+        this.email = email;
+        this.password = password;
+        this.username = username;
+        this.friends = [];
+    }
+
+    async login() {
+        try {
+            const result = await db.query('SELECT * FROM users WHERE email = $1', [this.email]);
+
+            // Si l'utilisateur n'existe pas
+            if (result.rows.length === 0) {
+                console.log("Email inconnu!");
+                return false;
+            }
+
+            const userFromDb = result.rows[0];
+
+            const validPassword = await bcrypt.compare(this.password, userFromDb.password_hash);
+
+            if (validPassword) {
+                console.log("Connexion réussie !");
+                this.userId = userFromDb.id;
+                this.username = userFromDb.username;
+                this.isAdmin = userFromDb.is_admin; 
+                return true;
+            } else {
+                console.log("Mot de passe incorrect.");
+                return false;
+            }
+
+        } catch (err) {
+            console.error("ERREUR DANS LOGIN :", err);
+            throw err; // Ça renverra l'erreur au fichier login.js
+        }
+    }
+
+    async register() {
+        if (!this.username || !this.email || !this.password) {
+            throw new Error("Tous les champs sont obligatoires !");
+        }
+
+        try {
+            const check = await db.query('SELECT id FROM users WHERE email = $1', [this.email]);
+            if (check.rows.length > 0) throw new Error("Email déjà utilisé.");
+
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(this.password, saltRounds);
+
+            const result = await db.query(
+                `INSERT INTO users (username, email, password_hash, is_admin) 
+                 VALUES ($1, $2, $3, FALSE) 
+                 RETURNING id`,
+                [this.username, this.email, hashedPassword]
+            );
+
+            this.userId = result.rows[0].id;
+            return this.userId;
+
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
+    getUserId() { return this.userId; }
+    getUsername() { return this.username; }
+    getEmail() { return this.email; }
+}
+
+module.exports = Users;
