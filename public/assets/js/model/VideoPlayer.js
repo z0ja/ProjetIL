@@ -118,16 +118,35 @@ export class VideoPlayer {
         this.currentState.setTime(time);
     }
 
-    loadVideo(video){
+    loadVideo(video,newState=true){
         if(!(video instanceof Video)){
             throw new Error("Function arguments types not corresponding with the given ones")
         }
         this.currentVideo = video;
-        this.currentState = new PlayerState(this.currentVideo.getVideoId());
+        if(newState) this.currentState = new PlayerState(this.currentVideo.getVideoId());
         this.player.loadVideoById(this.currentVideo.getVideoId());
     }
 
     getState(){
         return this.currentState;
+    }
+
+    setState(state){
+        if(!(state instanceof PlayerState)){
+            throw new Error("Function arguments types not corresponding with the given ones")
+        }
+
+        
+        this.currentState = state;
+
+        if(this.currentState.getVideoId() !== this.currentVideo.getVideoId()){
+            this.loadVideo(new Video(this.currentState.getVideoId()),false);
+        }
+
+        if(this.currentState.getStatus() === "played") this.play();
+        else if(this.currentState.getStatus() == "paused") this.pause();
+        else throw new Error("Video status is not played or paused");
+
+        this.seek(this.currentState.getTime());
     }
 }
