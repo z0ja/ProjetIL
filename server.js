@@ -2,14 +2,14 @@ const express = require('express');
 const app = express();
 const db = require('./db'); 
 
-// --- 1. IMPORT DES FICHIERS SÉPARÉS ---
+// --- IMPORT DES FICHIERS SÉPARÉS ---
 const register = require('./register');
 const login = require('./login');
 const history = require('./history');
 const authenticateToken = require('./Middleware'); 
 const checkAdmin = require('./adminMiddleware');
 
-// --- 2. MIDDLEWARE (Indispensable pour lire le JSON) ---
+// --- MIDDLEWARE (Indispensable pour lire le JSON) ---
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -24,7 +24,7 @@ app.get('/test-db', async (req, res) => {
     }
 });
 
-// C'est ici qu'on active tes fichiers !
+//C'est ici qu'on active les fichiers 
 app.post('/register', register);
 app.post('/login', login);
 
