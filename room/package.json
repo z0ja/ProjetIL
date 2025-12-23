@@ -1,0 +1,10 @@
+{
+  "name": "roomprojetil",
+  "version": "0.0.1",
+  "description": "le systeme de room pour les utilisateurs",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.22.1",
+    "socket.io": "^4.8.1"
+  }
+}
