@@ -9,6 +9,7 @@ export class VideoPlayer {
      */
     constructor(video=null,player=null) {
         console.log("test");
+        
         this.currentTime = 0;
         this.currentVideo = video;
 
