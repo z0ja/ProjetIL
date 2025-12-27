@@ -70,6 +70,38 @@ class Users {
         }
     }
 
+    async addToHistory(videoId) {
+        try {
+            await db.query(
+                `INSERT INTO user_history (user_id, video_id) VALUES ($1, $2)`,
+                [this.userId, videoId]
+            );
+            console.log(` Vidéo ${videoId} ajoutée à user_history pour l'user ${this.userId}`);
+            return true;
+        } catch (err) {
+            console.error("Erreur addToHistory:", err);
+            throw err;
+        }
+    }
+
+    //Récupérer tout l'historique
+    async getHistory() {
+        try {
+            const result = await db.query(
+                `SELECT videos.id, videos.title, videos.url, user_history.watched_at 
+                 FROM user_history 
+                 JOIN videos ON user_history.video_id = videos.id 
+                 WHERE user_history.user_id = $1 
+                 ORDER BY user_history.watched_at DESC`,
+                [this.userId]
+            );
+            return result.rows;
+        } catch (err) {
+            console.error("Erreur getHistory:", err);
+            throw err;
+        }
+    }
+
     getUserId() { return this.userId; }
     getUsername() { return this.username; }
     getEmail() { return this.email; }
