@@ -10,7 +10,7 @@ export class PlayerState {
         this.time = time;
         this.videoId = videoId;
 
-        if(typeof this.status !== "string" | typeof this.time !== "number" | typeof this.videoId !== "string"){
+        if(typeof this.status !== "string" || typeof this.time !== "number" || typeof this.videoId !== "string"){
             throw new Error("Constructor arguments types not corresponding with the given ones");
         }
 

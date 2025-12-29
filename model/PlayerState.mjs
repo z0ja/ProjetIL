@@ -1,16 +1,16 @@
-class PlayerState {
+export default class PlayerState {
     /**
      * 
      * @param {string} status 
      * @param {number} time 
      * @param {string} videoId 
      */
-    constructor(status,time,videoId) {
+    constructor(status="paused",time=0,videoId) {
         this.status = status;
         this.time = time;
         this.videoId = videoId;
 
-        if(typeof this.status !== "string" | typeof this.time !== "number" | typeof this.videoId !== "string"){
+        if(typeof this.status !== "string" || typeof this.time !== "number" || typeof this.videoId !== "string"){
             throw new Error("Constructor arguments types not corresponding with the given ones");
         }
     }
@@ -39,5 +39,13 @@ class PlayerState {
             throw new Error("Function arguments types not corresponding with the given ones");
         }
         this.time = time;
+    }
+
+    toJson(){
+        return {
+            status : this.getStatus(),
+            time : this.getTime(),
+            videoId : this.getVideoId(),
+        };
     }
 }

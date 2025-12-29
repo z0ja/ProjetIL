@@ -17,11 +17,15 @@ export class VideoPlayer {
             throw new Error("Constructor arguments types not corresponding with the given ones");
         }
 
-        if(player === null && video === null) this.currentState = new PlayerState();
+        if(player === null && video === null){
+            this.currentState = new PlayerState();
+            this.currentVideo = new Video();
+        }
+
         else if(player === null) this.currentState = new PlayerState(video.getVideoId()) ;
         else this.currentState = player;
 
-        // create iframe player
+        // crée le iframe player
         var tag = document.createElement('script');
 
         tag.src = "https://www.youtube.com/iframe_api";
@@ -63,7 +67,9 @@ export class VideoPlayer {
     }
 
     onPlayerReady(event){
-
+        this.loadVideo(new Video(this.currentVideo.getVideoId()),false);
+        
+        this.setState(this.currentState);
     }
 
     onPlayerStateChange(event){
@@ -88,16 +94,18 @@ export class VideoPlayer {
 
         if (diff > 2) {
             console.log("temps avancer");
+
             if(!this.admin){
-            this.seek(this.currentTime);
-            time = this.currentTime;
+                this.seek(this.currentTime);
+                time = this.currentTime;
             }
         } 
         else if (diff < -1) {
             console.log("temps reculer");
+
             if(!this.admin){
-            this.seek(this.currentTime);
-            time = this.currentTime;
+                this.seek(this.currentTime);
+                time = this.currentTime;
             }
         }
 
@@ -105,27 +113,38 @@ export class VideoPlayer {
     }
 
     play(){
-        this.player.playVideo();
-        //this.currentState.setStatus("played");
+        if (this.player && typeof this.player.playVideo === 'function') {
+            this.player.playVideo();
+        }
     }
 
     pause(){
-        this.player.pauseVideo();
-        //this.currentState.setStatus("paused");
+        if (this.player && typeof this.player.pauseVideo === 'function') {
+            this.player.pauseVideo();
+        }
     }
 
     seek(time){
-        this.player.seekTo(time,true);
         this.currentState.setTime(time);
+        this.currentTime = time;
+
+        if (this.player && typeof this.player.seekTo === 'function') {
+            this.player.seekTo(time,true);
+        }
     }
 
     loadVideo(video,newState=true){
         if(!(video instanceof Video)){
             throw new Error("Function arguments types not corresponding with the given ones")
         }
+        
         this.currentVideo = video;
+
         if(newState) this.currentState = new PlayerState(this.currentVideo.getVideoId());
-        this.player.loadVideoById(this.currentVideo.getVideoId());
+
+        if (this.player && typeof this.player.loadVideoById === 'function') {
+            this.player.loadVideoById(this.currentVideo.getVideoId());
+        }
     }
 
     getState(){
@@ -137,7 +156,6 @@ export class VideoPlayer {
             throw new Error("Function arguments types not corresponding with the given ones")
         }
 
-        
         this.currentState = state;
 
         if(this.currentState.getVideoId() !== this.currentVideo.getVideoId()){
@@ -145,7 +163,7 @@ export class VideoPlayer {
         }
 
         if(this.currentState.getStatus() === "played") this.play();
-        else if(this.currentState.getStatus() == "paused") this.pause();
+        else if(this.currentState.getStatus() === "paused") this.pause();
         else throw new Error("Video status is not played or paused");
 
         this.seek(this.currentState.getTime());

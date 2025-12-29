@@ -4,6 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { Server } from 'socket.io';
 
+import PlayerState from "../model/PlayerState.mjs";
+import * as broadcast from "./broadcast.js";
+
 const app = express();
 const server = createServer(app);
 
@@ -20,8 +23,15 @@ app.get('/', (req, res) => {
 	res.sendFile(join(__dirname, 'room.html'));
 });
 
+// test
+var playerState = new PlayerState("played",300,"M7lc1UVf-VE");
+
+
 io.on('connection', (socket) => {
 	console.log('a user connected');
+
+	broadcast.sendPlayerState(playerState,socket);
+
 	socket.on('disconnect', () => {
 		console.log('user disconnected');
 	});

@@ -1,9 +1,14 @@
-import {PlayerState} from "../model/PlayerState.js";
+export function broadcastPlayerState(state){
+    let json = state.toJson();
+    json['user'] = ""; // ajouter l'utilisateur qui a fait l'action pour faire en sorte de ne pas changer son 'PlayerState'
 
-function broadcastPlayerState(state){
-    if(typeof state !== PlayerState){
-        throw new Error("Function arguments types not corresponding with the given ones")
-    }
+    io.emit('changeState',json)
+}
 
+export function sendPlayerState(state,socket){
+    console.log("envoie");
+    let json = state.toJson();
+    json['user'] = "";
     
+    socket.emit('changeState',json);
 }

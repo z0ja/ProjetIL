@@ -8,8 +8,24 @@
 </head>
 <body>
     <h1>Test Synchro</h1>
+    <div id="player"></div>
 </body>
-<script>
+<script type="module">
+    import {VideoPlayer} from "../assets/js/model/VideoPlayer.js";
+    import {Video} from "../assets/js/model/Video.js"
+    import {PlayerState} from "../assets/js/model/PlayerState.js";
+
+    window.player = new VideoPlayer();
+
     const socket = io("http://localhost:3001");
+
+    socket.on('changeState', function(data){
+        console.log(data);
+        console.log(data["status"]);
+
+        let state = new PlayerState(data["videoId"], data["status"] ,parseInt(data["time"]));
+        window.player.setState(state);
+    });
+    
 </script>
 </html>
