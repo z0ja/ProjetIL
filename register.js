@@ -1,35 +1,28 @@
-const db = require('./db');      
-const bcrypt = require('bcrypt'); // On a besoin de bcrypt pour hasher
+const User = require('./model/Users');
 
 const register = async (req, res) => {
+    // On récupère les infos envoyées par Postman
     const { username, email, password } = req.body;
 
+    // On prépare un nouvel utilisateur
+    const newUser = new User(email, password, username);
+
     try {
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-        const query = `
-            INSERT INTO users (username, email, password_hash) 
-            VALUES ($1, $2, $3) 
-            RETURNING id, username, email, created_at
-        `;
-        
-        const result = await db.query(query, [username, email, hashedPassword]);
-
-        // 3. Réponse succès
-        res.status(201).json({ 
-            message: "Utilisateur inscrit !", 
-            user: result.rows[0] 
+        // On lance l'inscription via la Classe
+        await newUser.register();
+        res.status(201).json({
+            message: "Utilisateur inscrit avec succès !",
+            user: {
+                id: newUser.getUserId(),
+                username: newUser.getUsername(),
+                email: newUser.getEmail()
+            }
         });
 
     } catch (err) {
         console.error(err);
-        if (err.code === '23505') {
-            return res.status(400).json({ error: "Ce pseudo ou cet email est déjà pris." });
-        }
-        res.status(500).json({ error: "Erreur serveur lors de l'inscription." });
+        res.status(400).json({ error: err.message });
     }
 };
 
-// On exporte la fonction pour que server.js puisse l'utiliser
 module.exports = register;

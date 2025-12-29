@@ -15,7 +15,7 @@ const authenticateToken = (req, res, next) => {
             return res.status(403).json({ error: "Token invalide ou expiré." });
         }
 
-        // 3. C'est bon ! On attache l'utilisateur à la requête
+        // On attache l'utilisateur à la requête
         req.user = user; 
         next(); // On passe à la suite (la fonction d'historique)
     });
