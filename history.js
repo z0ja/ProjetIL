@@ -2,6 +2,7 @@ const User = require('./model/Users');
 
 //AJOUTER À L'HISTORIQUE
 exports.addToHistory = async (req, res) => { 
+
     const { videoId } = req.body; 
     const userId = req.user.id;   
 

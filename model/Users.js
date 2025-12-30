@@ -102,6 +102,76 @@ class Users {
         }
     }
 
+
+
+    async addFriend(friendId) {
+        try {
+            // On s'empêche de s'ajouter soi-même
+            if (this.userId == friendId) {
+                throw new Error("Tu ne peux pas t'ajouter toi-même !");
+            }
+
+            await db.query(
+                `INSERT INTO friends (user_id, friend_id) VALUES ($1, $2)`,
+                [this.userId, friendId]
+            );
+            console.log(`User ${this.userId} a ajouté l'ami ${friendId}`);
+            return true;
+        } catch (err) {
+            console.error("Erreur addFriend:", err);
+            throw err;
+        }
+    }
+
+    async getFriends() {
+        try {
+            // On récupère les infos (pseudo, email) de l'ami grâce à une jointure
+            const result = await db.query(
+                `SELECT users.id, users.username, users.email, friends.added_at 
+                 FROM friends 
+                 JOIN users ON friends.friend_id = users.id 
+                 WHERE friends.user_id = $1`,
+                [this.userId]
+            );
+            return result.rows;
+        } catch (err) {
+            console.error("Erreur getFriends:", err);
+            throw err;
+        }
+    }
+
+    async removeFriend(friendId) {
+        try {
+            const result = await db.query(
+                `DELETE FROM friends WHERE user_id = $1 AND friend_id = $2`,
+                [this.userId, friendId]
+            );
+
+            if (result.rowCount === 0) {
+                throw new Error("NOT_FRIENDS");
+            }
+            
+            console.log(`User ${this.userId} a retiré l'ami ${friendId}`);
+            return true;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    //Suppression DE L'HISTORIQUE
+    async clearHistory() {
+        try {
+            const result = await db.query(
+                `DELETE FROM user_history WHERE user_id = $1`,
+                [this.userId]
+            );
+            console.log(`Historique effacé pour l'user ${this.userId}`);
+            return result.rowCount; // Renvoie le nombre de vidéos supprimées
+        } catch (err) {
+            console.error("Erreur clearHistory:", err);
+            throw err;
+        }
+    }
     getUserId() { return this.userId; }
     getUsername() { return this.username; }
     getEmail() { return this.email; }
