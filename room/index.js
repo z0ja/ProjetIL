@@ -12,7 +12,7 @@ const server = createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "http://localhost:3002",
         methods: ["GET", "POST"]
     }
 });
@@ -24,13 +24,20 @@ app.get('/', (req, res) => {
 });
 
 // test
-var playerState = new PlayerState("played",300,"M7lc1UVf-VE");
+var playerState = new PlayerState("played",0,"M7lc1UVf-VE");
 
 
 io.on('connection', (socket) => {
 	console.log('a user connected');
 
 	broadcast.sendPlayerState(playerState,socket);
+
+	socket.on('changeState', (data) => {
+    	console.log(data); 
+		// mettre a jour l'attribut de type playerstate de la classe Room
+		playerState= new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"],);
+		broadcast.broadcastPlayerState(playerState, data["user"], io);
+  	});
 
 	socket.on('disconnect', () => {
 		console.log('user disconnected');

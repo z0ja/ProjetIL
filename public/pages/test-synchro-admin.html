@@ -16,7 +16,7 @@
     import {PlayerState} from "../assets/js/model/PlayerState.js";
 
     window.player = new VideoPlayer();
-    window.player.setAdmin(false);//temporaire
+    window.player.setAdmin(true);//temporaire
 
     window.socket = io("http://localhost:3001");
 
@@ -26,7 +26,7 @@
 
         if(data["user"] !== window.player.getUser()){
             let state = new PlayerState(data["videoId"], data["status"] ,parseInt(data["time"]));
-            window.player.setAdmin(false);//temporaire
+            window.player.setAdmin(true);//temporaire
             window.player.setState(state);
         }
     });

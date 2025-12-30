@@ -32,7 +32,7 @@ app.post('/history', authenticateToken, history.addToHistory);
 app.get('/history', authenticateToken, history.getHistory);   
 
 
-const PORT = 3000;
+const PORT = 3002;
 
 app.delete('/admin/delete-video', authenticateToken, checkAdmin, (req, res) => {
     res.json({ message: "SUPPRESSION RÉUSSIE ! (Seul un admin peut voir ça)" });

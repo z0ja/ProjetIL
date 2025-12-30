@@ -44,4 +44,12 @@ export class PlayerState {
         }
         this.time = time;
     }
+
+    toJson(){
+        return {
+            status : this.getStatus(),
+            time : this.getTime(),
+            videoId : this.getVideoId(),
+        };
+    }
 }

@@ -32,7 +32,8 @@ export class VideoPlayer {
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        this.admin = false; //temporaire
+        this.admin = true; //temporaire
+        this.user = Math.floor(Math.random() * 100).toString(); //temporaire user aleatoire
 
         let id;
         if (video === null) id = '';
@@ -76,13 +77,25 @@ export class VideoPlayer {
         if (event.data == YT.PlayerState.PLAYING) {
           if(this.currentState.getStatus() === "paused"){
             console.log("video lancer");
-            this.currentState.setStatus("played");
+
+            if(this.admin){
+                this.currentState.setStatus("played");
+                this.sendState();
+            }
           }
+
+          
           this.interval = setInterval(() => this.changeTime(),1000);
-        } else {
+        } 
+        
+        else {
           if(this.currentState.getStatus() === "played"){
             console.log("video en pause");
-            this.currentState.setStatus("paused");
+
+            if(this.admin){
+                this.currentState.setStatus("paused");
+                this.sendState();
+            }
           }
           clearInterval(this.interval);
         }
@@ -95,7 +108,12 @@ export class VideoPlayer {
         if (diff > 2) {
             console.log("temps avancer");
 
-            if(!this.admin){
+            if(this.admin){
+                this.currentTime = time;
+                this.sendState();
+            }
+
+            else{
                 this.seek(this.currentTime);
                 time = this.currentTime;
             }
@@ -103,7 +121,12 @@ export class VideoPlayer {
         else if (diff < -1) {
             console.log("temps reculer");
 
-            if(!this.admin){
+            if(this.admin){
+                this.currentTime = time;
+                this.sendState();
+            }
+
+            else{
                 this.seek(this.currentTime);
                 time = this.currentTime;
             }
@@ -167,5 +190,21 @@ export class VideoPlayer {
         else throw new Error("Video status is not played or paused");
 
         this.seek(this.currentState.getTime());
+    }
+
+    sendState(){
+        this.currentState.setTime(this.currentTime);
+
+        let json = this.currentState.toJson();
+        json["user"] = this.user;
+        window.socket.emit("changeState",json)
+    }
+
+    setAdmin(admin){ //temporaire
+        this.admin = admin;
+    }
+
+    getUser(){
+        return this.user;
     }
 }
