@@ -18,7 +18,7 @@
     window.player = new VideoPlayer();
     window.player.setAdmin(true);//temporaire
 
-    window.socket = io("http://localhost:3001");
+    window.socket = io("http://localhost:3003");
 
     socket.on('changeState', function(data){
         console.log(data);
@@ -28,6 +28,13 @@
             let state = new PlayerState(data["videoId"], data["status"] ,parseInt(data["time"]));
             window.player.setAdmin(true);//temporaire
             window.player.setState(state);
+        }
+    });
+
+    socket.on('getState',function(data){
+        console.log(data);
+        if(data == window.player.getUser()){
+            window.player.sendState("getState");
         }
     });
     

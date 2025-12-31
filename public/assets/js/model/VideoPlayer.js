@@ -80,7 +80,7 @@ export class VideoPlayer {
 
             if(this.admin){
                 this.currentState.setStatus("played");
-                this.sendState();
+                this.sendState("changeState");
             }
           }
 
@@ -94,7 +94,7 @@ export class VideoPlayer {
 
             if(this.admin){
                 this.currentState.setStatus("paused");
-                this.sendState();
+                this.sendState("changeState");
             }
           }
           clearInterval(this.interval);
@@ -110,7 +110,7 @@ export class VideoPlayer {
 
             if(this.admin){
                 this.currentTime = time;
-                this.sendState();
+                this.sendState("changeState");
             }
 
             else{
@@ -123,7 +123,7 @@ export class VideoPlayer {
 
             if(this.admin){
                 this.currentTime = time;
-                this.sendState();
+                this.sendState("changeState");
             }
 
             else{
@@ -192,12 +192,12 @@ export class VideoPlayer {
         this.seek(this.currentState.getTime());
     }
 
-    sendState(){
+    sendState(event){
         this.currentState.setTime(this.currentTime);
 
         let json = this.currentState.toJson();
         json["user"] = this.user;
-        window.socket.emit("changeState",json)
+        window.socket.emit(event,json);
     }
 
     setAdmin(admin){ //temporaire

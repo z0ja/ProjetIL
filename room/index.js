@@ -25,17 +25,34 @@ app.get('/', (req, res) => {
 
 // test
 var playerState = new PlayerState("played",0,"M7lc1UVf-VE");
+var lastUser = null;
 
 
 io.on('connection', (socket) => {
 	console.log('a user connected');
 
+	socket.on('getState', (data) => {
+		console.log("reçu : ")
+		console.log(data); 
+		// a faire verifier si l'utilisateur est un admin
+		// a faire mettre a jour l'attribut de type playerstate de la classe Room
+		playerState= new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"]);
+		broadcast.broadcastPlayerState(playerState, lastUser, io);
+	});
+
+
+	if(lastUser){
+		io.emit("getState",lastUser);
+	}
+
 	broadcast.sendPlayerState(playerState,socket);
 
 	socket.on('changeState', (data) => {
     	console.log(data); 
-		// mettre a jour l'attribut de type playerstate de la classe Room
-		playerState= new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"],);
+		// a faire verifier si l'utilisateur est un admin
+		// a faire mettre a jour l'attribut de type playerstate de la classe Room
+		playerState= new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"]);
+		lastUser = data["user"];
 		broadcast.broadcastPlayerState(playerState, data["user"], io);
   	});
 
@@ -44,7 +61,7 @@ io.on('connection', (socket) => {
 	});
 });
 
-server.listen(3001, () => {
-	console.log('server running at http://localhost:3001');
+server.listen(3003, () => {
+	console.log('server running at http://localhost:3003');
 });
 
