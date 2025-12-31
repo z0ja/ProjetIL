@@ -1,49 +1,43 @@
-const db = require('./db');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const User = require('./model/Users'); 
+const jwt = require('jsonwebtoken'); 
 
-// La clé secrète doit être la même partout !
-const SECRET_KEY = 'mon_secret_super_securise_watch2gether';
+const SECRET_KEY = 'mon_secret_super_securise_watch2gether'; 
 
 const login = async (req, res) => {
+    // On récupère les identifiants
     const { email, password } = req.body;
 
+    // On crée un objet User
+    const userAttempt = new User(email, password);
+
     try {
-        const query = 'SELECT * FROM users WHERE email = $1';
-        const result = await db.query(query, [email]);
+        const isValid = await userAttempt.login();
 
-        if (result.rows.length === 0) {
-            return res.status(401).json({ error: "Email ou mot de passe incorrect." });
+        if (isValid) {            
+            // On génère le Token (Le Badge)
+            const token = jwt.sign(
+                { 
+                    id: userAttempt.getUserId(), 
+                    username: userAttempt.getUsername(),
+                    isAdmin: userAttempt.isAdmin //pour gérer les admins
+                },
+                SECRET_KEY,
+                { expiresIn: '24h' }
+            );
+
+            res.json({
+                message: "Connexion réussie !",
+                token: token,
+                user: {
+                    id: userAttempt.getUserId(),
+                    username: userAttempt.getUsername()
+                }
+            });
+
+        } else {
+            // C'est perdu (Mot de passe ou email faux)
+            res.status(401).json({ error: "Email ou mot de passe incorrect." });
         }
-
-        const user = result.rows[0];
-
-        // 2. Vérification du mot de passe
-        const validPassword = await bcrypt.compare(password, user.password_hash);
-
-        if (!validPassword) {
-            return res.status(401).json({ error: "Email ou mot de passe incorrect." });
-        }
-
-        const token = jwt.sign(
-            { 
-                id: user.id, 
-                username: user.username,
-                isAdmin: user.is_admin 
-            },
-            SECRET_KEY,
-            { expiresIn: '24h' }
-        );
-
-        res.json({
-            message: "Connexion réussie !",
-            token: token,
-            user: { 
-                id: user.id, 
-                username: user.username, 
-                isAdmin: user.is_admin
-            }
-        });
 
     } catch (err) {
         console.error(err);
