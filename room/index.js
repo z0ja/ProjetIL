@@ -40,6 +40,14 @@ io.on('connection', (socket) => {
 		broadcast.broadcastPlayerState(playerState, lastUser, io);
 	});
 
+	socket.on('setState', (data) => {
+		console.log("setState");
+		
+		if(lastUser){
+			io.emit("getState",lastUser);
+		}
+	});
+
 
 	if(lastUser){
 		io.emit("getState",lastUser);

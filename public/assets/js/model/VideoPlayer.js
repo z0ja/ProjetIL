@@ -34,6 +34,7 @@ export class VideoPlayer {
 
         this.admin = true; //temporaire
         this.user = Math.floor(Math.random() * 100).toString(); //temporaire user aleatoire
+        this.jump = 0;
 
         let id;
         if (video === null) id = '';
@@ -75,25 +76,33 @@ export class VideoPlayer {
 
     onPlayerStateChange(event){
         if (event.data == YT.PlayerState.PLAYING) {
-          if(this.currentState.getStatus() === "paused"){
+            if(this.jump != 0) this.jump += 1;
+
+            if(this.currentState.getStatus() === "paused" && this.jump == 0){
             console.log("video lancer");
 
+            this.currentState.setStatus("played");
+
             if(this.admin){
-                this.currentState.setStatus("played");
                 this.sendState("changeState");
             }
-          }
 
-          
-          this.interval = setInterval(() => this.changeTime(),1000);
+            else{
+                this.jump += 1;
+                this.sendState("setState");
+            }
+            }
+
+            if(this.jump > 1) this.jump = 0;
+            this.interval = setInterval(() => this.changeTime(),1000);
         } 
         
         else {
           if(this.currentState.getStatus() === "played"){
             console.log("video en pause");
+            this.currentState.setStatus("paused");
 
             if(this.admin){
-                this.currentState.setStatus("paused");
                 this.sendState("changeState");
             }
           }
