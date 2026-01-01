@@ -16,9 +16,12 @@
     import {PlayerState} from "../assets/js/model/PlayerState.js";
 
     window.player = new VideoPlayer();
-    window.player.setAdmin(true);//temporaire
 
     window.socket = io("http://localhost:3003");
+
+    setTimeout(() => { 
+        window.player.setAdmin(true); //temporaire
+    }, 5000);
 
     socket.on('changeState', function(data){
         console.log(data);

@@ -32,9 +32,11 @@ export class VideoPlayer {
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        this.admin = true; //temporaire
+        this.admin = false; //temporaire
         this.user = Math.floor(Math.random() * 100).toString(); //temporaire user aleatoire
         this.jump = 0;
+        if(this.admin) this.JUMP_MAX = 6;
+        else this.JUMP_MAX = 1;
 
         let id;
         if (video === null) id = '';
@@ -70,8 +72,6 @@ export class VideoPlayer {
 
     onPlayerReady(event){
         this.loadVideo(new Video(this.currentVideo.getVideoId()),false);
-        
-        this.setState(this.currentState);
     }
 
     onPlayerStateChange(event){
@@ -93,20 +93,24 @@ export class VideoPlayer {
             }
             }
 
-            if(this.jump > 1) this.jump = 0;
+            if(this.jump > this.JUMP_MAX) this.jump = 0;
             this.interval = setInterval(() => this.changeTime(),1000);
         } 
         
         else {
-          if(this.currentState.getStatus() === "played"){
+            if(this.jump != 0 && this.admin) this.jump += 1;
+            
+            if(this.currentState.getStatus() === "played" && this.jump == 0){
             console.log("video en pause");
             this.currentState.setStatus("paused");
 
             if(this.admin){
                 this.sendState("changeState");
             }
-          }
-          clearInterval(this.interval);
+            }
+
+            if(this.jump > this.JUMP_MAX && this.admin) this.jump = 0;
+            clearInterval(this.interval);
         }
     }
 
@@ -119,7 +123,7 @@ export class VideoPlayer {
 
             if(this.admin){
                 this.currentTime = time;
-                this.sendState("changeState");
+                if(this.jump == 0) this.sendState("changeState");
             }
 
             else{
@@ -132,7 +136,7 @@ export class VideoPlayer {
 
             if(this.admin){
                 this.currentTime = time;
-                this.sendState("changeState");
+                if(this.jump == 0) this.sendState("changeState");
             }
 
             else{
@@ -187,6 +191,8 @@ export class VideoPlayer {
         if(!(state instanceof PlayerState)){
             throw new Error("Function arguments types not corresponding with the given ones")
         }
+
+        this.jump += 1;
 
         this.currentState = state;
 
