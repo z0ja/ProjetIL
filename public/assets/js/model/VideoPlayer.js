@@ -32,8 +32,11 @@ export class VideoPlayer {
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        this.admin = true; //temporaire
+        this.admin = false; //temporaire
         this.user = Math.floor(Math.random() * 100).toString(); //temporaire user aleatoire
+        this.jump = 0;
+        if(this.admin) this.JUMP_MAX = 6;
+        else this.JUMP_MAX = 1;
 
         let id;
         if (video === null) id = '';
@@ -69,35 +72,45 @@ export class VideoPlayer {
 
     onPlayerReady(event){
         this.loadVideo(new Video(this.currentVideo.getVideoId()),false);
-        
-        this.setState(this.currentState);
     }
 
     onPlayerStateChange(event){
         if (event.data == YT.PlayerState.PLAYING) {
-          if(this.currentState.getStatus() === "paused"){
+            if(this.jump != 0) this.jump += 1;
+
+            if(this.currentState.getStatus() === "paused" && this.jump == 0){
             console.log("video lancer");
 
-            if(this.admin){
-                this.currentState.setStatus("played");
-                this.sendState();
-            }
-          }
+            this.currentState.setStatus("played");
 
-          
-          this.interval = setInterval(() => this.changeTime(),1000);
+            if(this.admin){
+                this.sendState("changeState");
+            }
+
+            else{
+                this.jump += 1;
+                this.sendState("setState");
+            }
+            }
+
+            if(this.jump > this.JUMP_MAX) this.jump = 0;
+            this.interval = setInterval(() => this.changeTime(),1000);
         } 
         
         else {
-          if(this.currentState.getStatus() === "played"){
+            if(this.jump != 0 && this.admin) this.jump += 1;
+            
+            if(this.currentState.getStatus() === "played" && this.jump == 0){
             console.log("video en pause");
+            this.currentState.setStatus("paused");
 
             if(this.admin){
-                this.currentState.setStatus("paused");
-                this.sendState();
+                this.sendState("changeState");
             }
-          }
-          clearInterval(this.interval);
+            }
+
+            if(this.jump > this.JUMP_MAX && this.admin) this.jump = 0;
+            clearInterval(this.interval);
         }
     }
 
@@ -110,7 +123,7 @@ export class VideoPlayer {
 
             if(this.admin){
                 this.currentTime = time;
-                this.sendState();
+                if(this.jump == 0) this.sendState("changeState");
             }
 
             else{
@@ -123,7 +136,7 @@ export class VideoPlayer {
 
             if(this.admin){
                 this.currentTime = time;
-                this.sendState();
+                if(this.jump == 0) this.sendState("changeState");
             }
 
             else{
@@ -179,6 +192,8 @@ export class VideoPlayer {
             throw new Error("Function arguments types not corresponding with the given ones")
         }
 
+        this.jump += 1;
+
         this.currentState = state;
 
         if(this.currentState.getVideoId() !== this.currentVideo.getVideoId()){
@@ -192,12 +207,12 @@ export class VideoPlayer {
         this.seek(this.currentState.getTime());
     }
 
-    sendState(){
+    sendState(event){
         this.currentState.setTime(this.currentTime);
 
         let json = this.currentState.toJson();
         json["user"] = this.user;
-        window.socket.emit("changeState",json)
+        window.socket.emit(event,json);
     }
 
     setAdmin(admin){ //temporaire

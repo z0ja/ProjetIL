@@ -17,18 +17,18 @@
     <nav class="navbar container">
         <a class="navbar-brand" href="#">W2G</a>
         <div class="">
-            <ul class="navbar-nav d-flex flex-row gap-3">
+            <ul class="navbar-nav d-flex flex-row gap-3 align-items-center" id="nav-auth">
                 <li class="nav-item">
-                    <a  class="nav-link" href="index.html">Accueil</a>
+                    <a class="nav-link" href="../index.html">Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Room</a>
+                    <a class="nav-link" href="room.html">Room</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="login.html">Connexion</a>
                 </li>
-                <li class="nav-item d-sm-none">
-                    <a class="nav-link active" href="signup.html">S'inscrire</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="register.html">S'inscrire</a>
                 </li>
             </ul>
         </div>
@@ -50,7 +50,7 @@
     <section class="container">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <form>
+                <form id="registerForm">
                     <div class="mb-3">
                         <label for="signupName" class="form-label">Nom d'utilisateur</label>
                         <input type="text" class="form-control" id="signupName" placeholder="Votre nom d'utilisateur" required>
@@ -71,6 +71,7 @@
                         <input type="checkbox" class="form-check-input" id="agreeTerms" required>
                         <label class="form-check-label" for="agreeTerms">J'accepte les <a href="#">conditions d'utilisation</a></label>
                     </div>
+                    <p id="registerMessage" class="text-center text-danger"></p>
                     <button type="submit" class="btn btn-primary btn-lg w-100">S'inscrire</button>
                     <div class="text-center mt-3">
                         <a href="login.html">Déjà un compte ? Se connecter</a>
@@ -93,8 +94,8 @@
     <script src="../assets/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="../assets/js/jquery.min.js"></script>
     <script src="../assets/js/jquery.sticky.js"></script>
-    <script src="../assets/js/click-scroll.js"></script>
-    <script src="../assets/js/alphabet-scroll.js"></script>
-    <script src="../assets/js/custom.js"></script>
+    
+    <script src="../assets/js/register.js"></script>
+    <script src="../assets/js/auth-nav.js"></script>
 </body>
 </html>
