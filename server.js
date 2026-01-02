@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const db = require('./db'); 
+const path = require('path');
 
 // --- IMPORT DES FICHIERS SÉPARÉS ---
 const register = require('./register');
@@ -12,7 +13,9 @@ const checkAdmin = require('./adminMiddleware');
 // --- MIDDLEWARE (Indispensable pour lire le JSON) ---
 app.use(express.json());
 app.use(express.static('public'));
+//app.use(express.static("assets"));
 
+//app.use("/tchat", express.static(path.join(__dirname, "tchat")));
 
 app.get('/test-db', async (req, res) => {
     try {

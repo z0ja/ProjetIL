@@ -8,7 +8,10 @@ if (!token) {
     window.location.href = "login.html";
 }
 
-// Socket.IO
+// ==============================
+// Video SOCKET (port 3003)
+// ==============================
+
 window.socket = io("http://localhost:3003", {
     auth: {
         token: token
@@ -78,3 +81,42 @@ function extractVideoId(url) {
     }
 }
 
+// ==============================
+// CHAT SOCKET (port 3000)
+// ==============================
+
+const chatSocket = io("http://localhost:3000", {
+    auth: {
+        token: localStorage.getItem("token")
+    }
+});
+
+chatSocket.on("connect", () => {
+    console.log("Chat socket connected", chatSocket.id);
+});
+
+// DOM Chat
+const chatForm = document.getElementById("form");
+const chatInput = document.getElementById("input");
+const chatMessages = document.getElementById("messages");
+
+chatForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    if (!chatInput.value.trim()) return;
+
+    chatSocket.emit("chat message", chatInput.value);
+    chatInput.value = "";
+});
+
+chatSocket.on("chat message", ({username, msg}) => {
+    const item = document.createElement("li");
+    item.textContent = msg;
+    item.style.padding = "0.5rem";
+    chatMessages.appendChild(item);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+
+chatSocket.on("connect_error", (err) => {
+    console.error("Chat socket error", err.message);
+});
