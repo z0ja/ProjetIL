@@ -1,5 +1,7 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const app = express();
+
 const db = require('./db'); 
 
 // --- IMPORT DES FICHIERS SÉPARÉS ---
@@ -14,6 +16,7 @@ const Participant = require('./model/Participant');
 
 // --- MIDDLEWARE (Indispensable pour lire le JSON) ---
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static('public'));
 
 

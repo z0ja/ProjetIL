@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'mon_secret_super_securise_watch2gether';
 
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    // On cherche le token dans les Cookies OU dans le Header Authorization
+    const token = req.cookies.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
 
     if (token == null) {
         return res.status(401).json({ error: "Accès refusé : Token manquant." });
@@ -15,9 +15,8 @@ const authenticateToken = (req, res, next) => {
             return res.status(403).json({ error: "Token invalide ou expiré." });
         }
 
-        // On attache l'utilisateur à la requête
         req.user = user; 
-        next(); // On passe à la suite (la fonction d'historique)
+        next(); 
     });
 };
 
