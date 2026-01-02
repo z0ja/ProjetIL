@@ -17,19 +17,8 @@
     <nav class="navbar container">
         <a class="navbar-brand" href="#">W2G</a>
         <div class="">
-            <ul class="navbar-nav d-flex flex-row gap-3">
-                <li class="nav-item">
-                    <a  class="nav-link" href="index.html">Accueil</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="room.html">Room</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="login.html">Connexion</a>
-                </li>
-                <li class="nav-item d-sm-none">
-                    <a class="nav-link" href="signup.html">S'inscrire</a>
-                </li>
+            <ul class="navbar-nav d-flex flex-row gap-3 align-items-center" id="nav-auth">
+                
             </ul>
         </div>
     </nav>
@@ -52,8 +41,7 @@
             <!-- Lecteur vidéo principal -->
             <div class="col-lg-8">
                 <div class="ratio ratio-16x9 mb-4">
-                    <!-- Placeholder pour un lecteur vidéo (e.g., YouTube embed) -->
-                    <iframe id="videoPlayer" src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1" title="Lecteur vidéo W2G" allowfullscreen></iframe>
+                    <div id="player"></div>
                 </div>
                 <!-- Contrôles de lecture (simulés, à synchroniser via JS/WebSockets) -->
                 <div class="d-flex justify-content-center gap-3 mb-4">
@@ -119,9 +107,9 @@
     <script src="../assets/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="../assets/js/jquery.min.js"></script>
     <script src="../assets/js/jquery.sticky.js"></script>
-    <script src="../assets/js/click-scroll.js"></script>
-    <script src="../assets/js/alphabet-scroll.js"></script>
-    <script src="../assets/js/custom.js"></script>
-    <script src="../assets/js/room.js"></script>
+     
+    <script src="http://localhost:3003/socket.io/socket.io.js"></script>
+    <script type="module" src="../assets/js/room.js"></script>
+    <script src="../assets/js/auth-nav.js"></script>
 </body>
 </html>
