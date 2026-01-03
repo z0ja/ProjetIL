@@ -19,5 +19,4 @@ class Playlist{
 		return this.list[this.pointer++];
 	}
 
-
 }
