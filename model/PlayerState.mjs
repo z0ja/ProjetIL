@@ -1,21 +1,17 @@
-export class PlayerState {
+export default class PlayerState {
     /**
      * 
      * @param {string} status 
      * @param {number} time 
      * @param {string} videoId 
      */
-    constructor(videoId="",status="paused",time=0) { // status = "paused" | "played"
+    constructor(status="paused",time=0,videoId) {
         this.status = status;
         this.time = time;
         this.videoId = videoId;
 
         if(typeof this.status !== "string" || typeof this.time !== "number" || typeof this.videoId !== "string"){
             throw new Error("Constructor arguments types not corresponding with the given ones");
-        }
-
-        if(this.status !== "paused" && this.status !== "played"){
-            throw new Error("status value not 'paused' or 'played'");
         }
     }
 

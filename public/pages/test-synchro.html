@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://localhost:3003/socket.io/socket.io.js"></script>
+    <title>Test</title>
+</head>
+<body>
+    <h1>Test Synchro</h1>
+    <div id="player"></div>
+</body>
+<script type="module">
+    import {VideoPlayer} from "../assets/js/model/VideoPlayer.js";
+    import {Video} from "../assets/js/model/Video.js"
+    import {PlayerState} from "../assets/js/model/PlayerState.js";
+
+    window.player = new VideoPlayer();
+    window.player.setAdmin(false);//temporaire
+
+    window.socket = io("http://localhost:3003");
+
+    socket.on('changeState', function(data){
+        console.log(data);
+        console.log(data["status"]);
+
+        if(data["user"] !== window.player.getUser()){
+            let state = new PlayerState(data["videoId"], data["status"] ,parseInt(data["time"]));
+            window.player.setAdmin(false);//temporaire
+            window.player.setState(state);
+        }
+    });
+
+    socket.on('getState',function(data){
+        console.log(data);
+        if(data == window.player.getUser()){
+            window.player.sendState("getState");
+        }
+    });
+    
+</script>
+</html>

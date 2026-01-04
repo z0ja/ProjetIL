@@ -10,16 +10,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap" rel="stylesheet">
     
-    <title id="titre">Room - W2G</title>
-    <p id="room-id"></p>
+    <title>Room - W2G</title>
 </head>
 <body class="mx-5 mx-md-4">
     
     <nav class="navbar container">
         <a class="navbar-brand" href="#">W2G</a>
         <div class="">
-            <ul class="navbar-nav d-flex flex-row gap-3 align-items-center" id="nav-auth">
-                
+            <ul class="navbar-nav d-flex flex-row gap-3">
+                <li class="nav-item">
+                    <a  class="nav-link" href="index.html">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="room.html">Room</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="login.html">Connexion</a>
+                </li>
+                <li class="nav-item d-sm-none">
+                    <a class="nav-link" href="signup.html">S'inscrire</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -42,7 +52,8 @@
             <!-- Lecteur vidéo principal -->
             <div class="col-lg-8">
                 <div class="ratio ratio-16x9 mb-4">
-                    <div id="player"></div>
+                    <!-- Placeholder pour un lecteur vidéo (e.g., YouTube embed) -->
+                    <iframe id="videoPlayer" src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1" title="Lecteur vidéo W2G" allowfullscreen></iframe>
                 </div>
                 <!-- Contrôles de lecture (simulés, à synchroniser via JS/WebSockets) -->
                 <div class="d-flex justify-content-center gap-3 mb-4">
@@ -74,28 +85,12 @@
                 </div>
                 
                 <!-- Chat en temps réel -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Chat</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <ul id="messages"
-                            style="list-style:none; padding:10px; margin:0; height:300px; overflow-y:auto;">
-                        </ul>
-                    </div>
+				<iframe src="../../tchat/index.html">
 
-                    <div class="card-footer p-2">
-                        <form id="form" class="d-flex gap-2">
-                        <input id="input"
-                                class="form-control"
-                                autocomplete="off"
-                                placeholder="Message..." />
-                        <button class="btn btn-primary">Send</button>
-                        </form>
-                    </div>
-                    </div>
-                </div>
+				</iframe>
             </div>
+
+            <!-- playlist -->
         </div>
     </section>
 
@@ -112,18 +107,9 @@
     <script src="../assets/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="../assets/js/jquery.min.js"></script>
     <script src="../assets/js/jquery.sticky.js"></script>
-     
-    <script src="http://localhost:3003/socket.io/socket.io.js"></script>
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-    <script type="module" src="../assets/js/room.js"></script>
-    <script type="module" src="../assets/js/chat.js"></script>
-    <script src="../assets/js/auth-nav.js"></script>
-	<script>
-		//test
-		const room = JSON.parse(localStorage.getItem('currentRoom'));
-		console.log(room.name, room.admin);
-		document.getElementById("titre").innerHTML = "Room"+room.name;
-		document.getElementById("room-id").innerHTML = "id: "+room.id;
-	</script>
+    <script src="../assets/js/click-scroll.js"></script>
+    <script src="../assets/js/alphabet-scroll.js"></script>
+    <script src="../assets/js/custom.js"></script>
+    <script src="../assets/js/room.js"></script>
 </body>
 </html>

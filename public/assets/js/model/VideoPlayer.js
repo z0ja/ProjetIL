@@ -9,6 +9,7 @@ export class VideoPlayer {
      */
     constructor(video=null,player=null) {
         console.log("test");
+        
         this.currentTime = 0;
         this.currentVideo = video;
 
@@ -16,11 +17,15 @@ export class VideoPlayer {
             throw new Error("Constructor arguments types not corresponding with the given ones");
         }
 
-        if(player === null && video === null) this.currentState = new PlayerState();
+        if(player === null && video === null){
+            this.currentState = new PlayerState();
+            this.currentVideo = new Video();
+        }
+
         else if(player === null) this.currentState = new PlayerState(video.getVideoId()) ;
         else this.currentState = player;
 
-        // create iframe player
+        // crée le iframe player
         var tag = document.createElement('script');
 
         tag.src = "https://www.youtube.com/iframe_api";
@@ -28,6 +33,10 @@ export class VideoPlayer {
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         this.admin = false; //temporaire
+        this.user = Math.floor(Math.random() * 100).toString(); //temporaire user aleatoire
+        this.jump = 0;
+        if(this.admin) this.JUMP_MAX = 6;
+        else this.JUMP_MAX = 1;
 
         let id;
         if (video === null) id = '';
@@ -62,22 +71,46 @@ export class VideoPlayer {
     }
 
     onPlayerReady(event){
-
+        this.loadVideo(new Video(this.currentVideo.getVideoId()),false);
     }
 
     onPlayerStateChange(event){
         if (event.data == YT.PlayerState.PLAYING) {
-          if(this.currentState.getStatus() === "paused"){
+            if(this.jump != 0) this.jump += 1;
+
+            if(this.currentState.getStatus() === "paused" && this.jump == 0){
             console.log("video lancer");
+
             this.currentState.setStatus("played");
-          }
-          this.interval = setInterval(() => this.changeTime(),1000);
-        } else {
-          if(this.currentState.getStatus() === "played"){
+
+            if(this.admin){
+                this.sendState("changeState");
+            }
+
+            else{
+                this.jump += 1;
+                this.sendState("setState");
+            }
+            }
+
+            if(this.jump > this.JUMP_MAX) this.jump = 0;
+            this.interval = setInterval(() => this.changeTime(),1000);
+        } 
+        
+        else {
+            if(this.jump != 0 && this.admin) this.jump += 1;
+            
+            if(this.currentState.getStatus() === "played" && this.jump == 0){
             console.log("video en pause");
             this.currentState.setStatus("paused");
-          }
-          clearInterval(this.interval);
+
+            if(this.admin){
+                this.sendState("changeState");
+            }
+            }
+
+            if(this.jump > this.JUMP_MAX && this.admin) this.jump = 0;
+            clearInterval(this.interval);
         }
     }
 
@@ -87,16 +120,28 @@ export class VideoPlayer {
 
         if (diff > 2) {
             console.log("temps avancer");
-            if(!this.admin){
-            this.seek(this.currentTime);
-            time = this.currentTime;
+
+            if(this.admin){
+                this.currentTime = time;
+                if(this.jump == 0) this.sendState("changeState");
+            }
+
+            else{
+                this.seek(this.currentTime);
+                time = this.currentTime;
             }
         } 
         else if (diff < -1) {
             console.log("temps reculer");
-            if(!this.admin){
-            this.seek(this.currentTime);
-            time = this.currentTime;
+
+            if(this.admin){
+                this.currentTime = time;
+                if(this.jump == 0) this.sendState("changeState");
+            }
+
+            else{
+                this.seek(this.currentTime);
+                time = this.currentTime;
             }
         }
 
@@ -104,30 +149,77 @@ export class VideoPlayer {
     }
 
     play(){
-        this.player.playVideo();
-        //this.currentState.setStatus("played");
+        if (this.player && typeof this.player.playVideo === 'function') {
+            this.player.playVideo();
+        }
     }
 
     pause(){
-        this.player.pauseVideo();
-        //this.currentState.setStatus("paused");
+        if (this.player && typeof this.player.pauseVideo === 'function') {
+            this.player.pauseVideo();
+        }
     }
 
     seek(time){
-        this.player.seekTo(time,true);
         this.currentState.setTime(time);
+        this.currentTime = time;
+
+        if (this.player && typeof this.player.seekTo === 'function') {
+            this.player.seekTo(time,true);
+        }
     }
 
-    loadVideo(video){
+    loadVideo(video,newState=true){
         if(!(video instanceof Video)){
             throw new Error("Function arguments types not corresponding with the given ones")
         }
+        
         this.currentVideo = video;
-        this.currentState = new PlayerState(this.currentVideo.getVideoId());
-        this.player.loadVideoById(this.currentVideo.getVideoId());
+
+        if(newState) this.currentState = new PlayerState(this.currentVideo.getVideoId());
+
+        if (this.player && typeof this.player.loadVideoById === 'function') {
+            this.player.loadVideoById(this.currentVideo.getVideoId());
+        }
     }
 
     getState(){
         return this.currentState;
+    }
+
+    setState(state){
+        if(!(state instanceof PlayerState)){
+            throw new Error("Function arguments types not corresponding with the given ones")
+        }
+
+        this.jump += 1;
+
+        this.currentState = state;
+
+        if(this.currentState.getVideoId() !== this.currentVideo.getVideoId()){
+            this.loadVideo(new Video(this.currentState.getVideoId()),false);
+        }
+
+        if(this.currentState.getStatus() === "played") this.play();
+        else if(this.currentState.getStatus() === "paused") this.pause();
+        else throw new Error("Video status is not played or paused");
+
+        this.seek(this.currentState.getTime());
+    }
+
+    sendState(event){
+        this.currentState.setTime(this.currentTime);
+
+        let json = this.currentState.toJson();
+        json["user"] = this.user;
+        window.socket.emit(event,json);
+    }
+
+    setAdmin(admin){ //temporaire
+        this.admin = admin;
+    }
+
+    getUser(){
+        return this.user;
     }
 }

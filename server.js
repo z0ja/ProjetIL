@@ -3,6 +3,7 @@ const cookieParser = require('cookie-parser');
 const app = express();
 
 const db = require('./db'); 
+const path = require('path');
 
 // --- IMPORT DES FICHIERS SÉPARÉS ---
 const register = require('./register');
@@ -18,7 +19,9 @@ const Participant = require('./model/Participant');
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static('public'));
+//app.use(express.static("assets"));
 
+//app.use("/tchat", express.static(path.join(__dirname, "tchat")));
 
 app.get('/test-db', async (req, res) => {
     try {
@@ -36,7 +39,6 @@ app.post('/login', login);
 
 app.post('/history', authenticateToken, history.addToHistory); 
 app.get('/history', authenticateToken, history.getHistory);  
-
 
 
 app.delete('/history', authenticateToken, async (req, res) => {
@@ -191,7 +193,12 @@ app.get('/rooms/:roomId/participants', authenticateToken, async (req, res) => {
     }
 });
 
-const PORT = 3000;
+app.delete('/admin/delete-video', authenticateToken, checkAdmin, (req, res) => {
+    res.json({ message: "SUPPRESSION RÉUSSIE ! (Seul un admin peut voir ça)" });
+});
+
+
+const PORT = 3002; 
 app.listen(PORT, () => {
     console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });

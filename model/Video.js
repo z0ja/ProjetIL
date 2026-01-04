@@ -6,13 +6,14 @@ class Video {
      * @param {string} url 
      * @param {number|null} id 
      */
-    constructor(title, url, id = null) {
-        this.id = id;
+
+    constructor(videoId="",title="",url="") {
+        this.videoId = videoId;
         this.title = title;
         this.url = url;
 
-        if (typeof this.title !== "string" || typeof this.url !== "string") {
-            throw new Error("Le titre et l'URL doivent être des chaînes de caractères (string)");
+        if(typeof this.videoId !== "string" || typeof this.title !== "string" || typeof this.url !== "string"){
+            throw new Error("Constructor arguments types not corresponding with the given ones");
         }
     }
 

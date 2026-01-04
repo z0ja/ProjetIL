@@ -10,8 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap" rel="stylesheet">
     
-    <title id="titre">Room - W2G</title>
-    <p id="room-id"></p>
+    <title>Room - W2G</title>
 </head>
 <body class="mx-5 mx-md-4">
     
@@ -118,12 +117,5 @@
     <script type="module" src="../assets/js/room.js"></script>
     <script type="module" src="../assets/js/chat.js"></script>
     <script src="../assets/js/auth-nav.js"></script>
-	<script>
-		//test
-		const room = JSON.parse(localStorage.getItem('currentRoom'));
-		console.log(room.name, room.admin);
-		document.getElementById("titre").innerHTML = "Room"+room.name;
-		document.getElementById("room-id").innerHTML = "id: "+room.id;
-	</script>
 </body>
 </html>
