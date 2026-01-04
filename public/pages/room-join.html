@@ -15,22 +15,22 @@
 	<script src="http://localhost:3004/socket.io/socket.io.js"></script>
 	<script>
 		const socket = io(":3004");
-		const username = JSON.parse(localStorage.getItem("user")).username;
+		const userId = JSON.parse(localStorage.getItem("user")).id;
 		document.getElementById("join-room-form").addEventListener("submit", (e) => {
     		e.preventDefault();
 			const roomId = document.getElementById("room-name").value;
 
-			console.log(roomId, username);
-			socket.emit("user connect", roomName, username);
+			console.log(roomId, userId);
+			socket.emit("user connect", roomId, userId);
 		});
 
-		socket.on('no id' => {
+		socket.on('no id', () => {
 			document.getElementById("error").innerHTML = "cette ID ne correspond à aucune room";
 		});
 
-		socket.on('accepted', (username) =>{
+		socket.on('accepted', (userId) =>{
 			// pour pas confondre deux utilisateurs mais pas safe, TODO: utiliser token unique
-			if(user == username){
+			if(user == userId){
 				localStorage.setItem("roomId", roomId);
 				// devra renvoyer la bonne room
         		window.location.href = "room.html";
