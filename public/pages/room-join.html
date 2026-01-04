@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+	<meta charset="utf-8">
+	<title>créez votre room</title>
+    </head>
+    <body>
+	<form id="join-room-form">
+		<label for="room-name">ID de la room</label>
+		<input type="text" id="room-name" name="room-name" required>
+		<button type="submit">rejoindre</button>
+	</form>
+	<div id="error"></div>
+    </body>
+	<script src="http://localhost:3004/socket.io/socket.io.js"></script>
+	<script>
+		const socket = io(":3004");
+		const username = JSON.parse(localStorage.getItem("user")).username;
+		document.getElementById("join-room-form").addEventListener("submit", (e) => {
+    		e.preventDefault();
+			const roomId = document.getElementById("room-name").value;
+
+			console.log(roomId, username);
+			socket.emit("user connect", roomName, username);
+		});
+
+		socket.on('no id' => {
+			document.getElementById("error").innerHTML = "cette ID ne correspond à aucune room";
+		});
+
+		socket.on('accepted', (username) =>{
+			// pour pas confondre deux utilisateurs mais pas safe, TODO: utiliser token unique
+			if(user == username){
+				localStorage.setItem("roomId", roomId);
+				// devra renvoyer la bonne room
+        		window.location.href = "room.html";
+			}
+		});
+	</script>
+</html>
+

@@ -1,11 +1,11 @@
-const user = require('./User.js');
-
 class Participant{
-	constructor(id, email, username, friends = []) {
-		this.id = id;
-		this.email = email;
+	constructor(username, isadmin = false) {
+		//this.id = id;
+		//this.email = email;
 		this.username = username;
-		this.friends = friends; 
-		this.isAdmin = false;
+		//this.friends = friends; 
+		this.isAdmin = isadmin;
 	}
 }
+
+module.exports = Participant;

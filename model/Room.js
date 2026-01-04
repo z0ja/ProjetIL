@@ -1,16 +1,17 @@
-require("./Participant.js");
-const room = require("../room/index.js");
-const broadcast = require("../room/broadcast.js");
-const playlist = require("./Playlist.js");
+//const playlist = require("./Playlist.js");
 const db = require('../db');
 
 class Room {
 	static listId = new Set();
 	constructor(name, admin){
+		if(!admin){ // il faut être login
+			throw new Error("il faut être login pour pouvoir créer une room");
+		}
+
 		// génère une id random pour la room
 		do{
-			this.id = Math.random()*100000;
-		} while(this.listId.includes());
+			this.id = Math.floor(Math.random()*100000);
+		} while(Room.listId.has(this.id));
 		Room.listId.add(this.id);
 
 		this.name = name;

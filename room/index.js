@@ -7,6 +7,9 @@ import { Server } from 'socket.io';
 import PlayerState from "../model/PlayerState.mjs";
 import * as broadcast from "./broadcast.js";
 
+import Room from '../model/Room.js';
+import Participant from "../model/Participant.js";
+
 const app = express();
 const server = createServer(app);
 
@@ -19,22 +22,45 @@ const io = new Server(server, {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-let roomId;
-let roomName;
-const participant = [];
+//let roomId;
+//let roomName;
+//const participant = [];
 
 app.get('/', (req, res) => {
-	res.sendFile(join(__dirname, 'room.html'));
+	res.sendFile(join(__dirname, '../public/pages/room-make.html'));
 });
 
 // test
 var playerState = new PlayerState("played",0,"M7lc1UVf-VE");
 var lastUser = null;
-
+const mapRoom = new Map(); // dictionnaire des room (temporaire ?)
 
 io.on('connection', (socket) => {
-	// lors de la connexion d'un utilisateur
 	console.log('a user connected');
+
+	// lors de la création de la room
+	// TODO: changer les username en user id et aller chercher les infos dans la bdd
+	socket.on('room creation', (roomName, username) => {
+		const room = new Room(roomName, username);
+		const admin = new Participant(username, true);
+		room.join(admin);
+		mapRoom.set(room.id, room);
+
+		io.emit('room id', (room.id));
+		console.log('=== NEW ROOM ===');
+		console.log(roomName, room.id);
+	});
+	
+	socket.on('user connect', (roomId, username) => {
+		if(!mapRoom.has(roomId)){
+			io.emit('no id');
+			//throw new Error("cet id n'existe pas");
+		}else{
+			const newParticipant = new Participant(username);
+			mapRoom.get(roomId).join(newParticipant);
+			io.emit('accepted', (username));
+		}
+	});
 
 	socket.on('getState', (data) => {
 		console.log("reçu : ")
@@ -74,7 +100,7 @@ io.on('connection', (socket) => {
 	});
 });
 
-server.listen(3003, () => {
-	console.log('server running at http://localhost:3003');
+server.listen(3004, () => {
+	console.log('server running at http://localhost:3004');
 });
 
