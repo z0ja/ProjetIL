@@ -6,13 +6,30 @@
     </head>
     <body>
 	<form id="create-room-form">
-		<label for="room-name">Room Name:</label>
+		<label for="room-name">Nom de la room</label>
 		<input type="text" id="room-name" name="room-name" required>
-		<button type="submit">Create Room</button>
+		<button type="submit">Créer</button>
 	</form>
+	<div id="room-id"></div>
     </body>
+	<script src="http://localhost:3004/socket.io/socket.io.js"></script>
 	<script>
+		const socket = io(":3004");
+		document.getElementById("create-room-form").addEventListener("submit", (e) => {
+    		e.preventDefault();
 
+			const user = JSON.parse(localStorage.getItem("user")).id;
+			const roomName = document.getElementById("room-name").value;
+
+			console.log(roomName, user);
+			socket.emit("room creation", roomName, user);
+		});
+
+		socket.on('room id', (roomId) =>{
+			document.getElementById('room-id').innerHTML = roomId;
+			console.log('room id: ', roomId);
+			localStorage.setItem("roomId", roomId);
+		});
 	</script>
 </html>
 

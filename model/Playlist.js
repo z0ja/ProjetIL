@@ -3,7 +3,7 @@ require("../model/Video.js");
 class Playlist{
 
 	constructor(){
-		const this.list = [];
+		const list = [];
 		this.pointer = 0;
 	}
 
