@@ -38,7 +38,9 @@ class Room {
 	}
 
 	join(participant){
-		this.listeParticipants.add(participant);
+		if(!this.listeParticipants.has(participant)){
+			this.listeParticipants.add(participant);
+		}
 	}
 
 	leave(participant){

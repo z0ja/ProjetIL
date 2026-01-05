@@ -42,23 +42,26 @@ io.on('connection', (socket) => {
 	// TODO: changer les username en user id et aller chercher les infos dans la bdd
 	socket.on('room creation', (roomName, userId) => {
 		const room = new Room(roomName, userId);
-		const admin = new Participant(userId, room.id, true);
+		//console.log(userId, room.id);
+		const admin = new Participant(userId, String(room.id), true);
 		room.join(admin);
-		mapRoom.set(room.id, room);
+		mapRoom.set(String(room.id), room);
 
-		io.emit('room id', (room.id));
+		socket.emit('room object', (room));
 		console.log('=== NEW ROOM ===');
 		console.log(roomName, room.id);
 	});
 	
 	socket.on('user connect', (roomId, userId) => {
+		//console.log(mapRoom);
+		roomId = String(roomId);
 		if(!mapRoom.has(roomId)){
-			io.emit('no id');
-			//throw new Error("cet id n'existe pas");
+			socket.emit('no id', userId);
 		}else{
-			const newParticipant = new Participant(userId, room.id);
+			const newParticipant = new Participant(userId, roomId, false);
 			mapRoom.get(roomId).join(newParticipant);
-			io.emit('accepted', (userId));
+			console.log(mapRoom.get(roomId));
+			socket.emit('accepted', mapRoom.get(roomId), userId);
 		}
 	});
 

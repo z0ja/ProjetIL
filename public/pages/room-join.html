@@ -15,26 +15,26 @@
 	<script src="http://localhost:3004/socket.io/socket.io.js"></script>
 	<script>
 		const socket = io(":3004");
-		const userId = JSON.parse(localStorage.getItem("user")).id;
+		const user = JSON.parse(localStorage.getItem("user"));
+		let currentRoomId = null;
+
 		document.getElementById("join-room-form").addEventListener("submit", (e) => {
-    		e.preventDefault();
-			const roomId = document.getElementById("room-name").value;
-
-			console.log(roomId, userId);
-			socket.emit("user connect", roomId, userId);
+			document.getElementById("error").innerHTML = "";
+			e.preventDefault();
+			currentRoomId = document.getElementById("room-name").value;
+			socket.emit("user connect", currentRoomId, user.id);
 		});
 
-		socket.on('no id', () => {
-			document.getElementById("error").innerHTML = "cette ID ne correspond à aucune room";
-		});
-
-		socket.on('accepted', (userId) =>{
-			// pour pas confondre deux utilisateurs mais pas safe, TODO: utiliser token unique
-			if(user == userId){
-				localStorage.setItem("roomId", roomId);
-				// devra renvoyer la bonne room
-        		window.location.href = "room.html";
+		socket.on('no id', (userId) => {
+			if(userId == user.id){
+				document.getElementById("error").innerHTML = "cette ID ne correspond à aucune room";
 			}
+		});
+
+		socket.on('accepted', (room, userId) => {
+			console.log(room);
+			localStorage.setItem('roomObject', JSON.stringify(room));
+			window.location.href = "./room.html";
 		});
 	</script>
 </html>

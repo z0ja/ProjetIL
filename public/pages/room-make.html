@@ -18,17 +18,18 @@
 		document.getElementById("create-room-form").addEventListener("submit", (e) => {
     		e.preventDefault();
 
-			const user = JSON.parse(localStorage.getItem("user")).id;
+			const userId = JSON.parse(localStorage.getItem("user")).id;
 			const roomName = document.getElementById("room-name").value;
 
-			console.log(roomName, user);
-			socket.emit("room creation", roomName, user);
+			console.log(roomName, userId);
+			socket.emit("room creation", roomName, userId);
 		});
 
-		socket.on('room id', (roomId) =>{
-			document.getElementById('room-id').innerHTML = roomId;
-			console.log('room id: ', roomId);
-			localStorage.setItem("roomId", roomId);
+		socket.on('room object', (room) =>{
+			document.getElementById('room-id').innerHTML = room.id;
+			console.log('room: ', JSON.stringify(room));
+			localStorage.setItem("roomObject", JSON.stringify(room));
+			//window.location.href = "./room.html";
 		});
 	</script>
 </html>
