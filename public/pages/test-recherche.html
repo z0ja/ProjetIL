@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche YouTube API</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .input-group { margin-bottom: 20px; }
+        input { padding: 10px; width: 60%; }
+        button { padding: 10px 20px; cursor: pointer; }
+        
+        .video-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .video-card img { max-width: 180px; height: auto; border-radius: 4px; }
+        .video-info h3 { margin: 0 0 5px 0; font-size: 1.1em; }
+        .video-info p { margin: 5px 0; font-size: 0.9em; color: #555; }
+        .video-id { font-size: 0.8em; color: #888; font-family: monospace; }
+    </style>
+</head>
+<body>
+
+    <h2>Recherche YouTube</h2>
+
+    <div class="input-group">
+        <input type="text" id="searchInput" placeholder="Rechercher une vidéo (ex: Tutoriel JavaScript)...">
+        <button onclick="performSearch()">Rechercher</button>
+    </div>
+
+    <div id="resultsContainer"></div>
+
+    <script>
+        const SERVER_URL = 'http://localhost:3002/search'; 
+
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value;
+            const container = document.getElementById('resultsContainer');
+            
+            if (!query) return alert("Veuillez entrer un terme");
+
+            container.innerHTML = 'Chargement via le serveur sécurisé...';
+
+            try {
+                // Appel vers NOTRE serveur Node.js
+                const response = await fetch(`${SERVER_URL}?q=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur Serveur: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data.items);
+
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = `<p style="color:red">Erreur: ${error.message}</p>`;
+            }
+        }
+
+        function displayResults(videos) {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = ''; 
+
+            if (!videos || videos.length === 0) {
+                container.innerHTML = '<p>Aucune vidéo trouvée.</p>';
+                return;
+            }
+
+            for (const item of videos) {
+                if (item.id.kind !== 'youtube#video') continue;
+
+                const title = item.snippet.title;
+                const description = item.snippet.description;
+                const thumbnail = item.snippet.thumbnails.medium.url;
+                const videoId = item.id.videoId;
+
+                const videoElement = document.createElement('div');
+                videoElement.className = 'video-card';
+                
+                videoElement.innerHTML = `
+                    <img src="${thumbnail}" alt="${title}">
+                    <div class="video-info">
+                        <h3><a href="https://www.youtube.com/watch?v=${videoId}" target="_blank">${title}</a></h3>
+                        <p class="video-id">ID: ${videoId}</p>
+                        <p>${description}</p>
+                    </div>
+                `;
+
+                container.appendChild(videoElement);
+            }
+        }
+    </script>
+</body>
+</html>

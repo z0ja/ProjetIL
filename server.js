@@ -5,6 +5,8 @@ const app = express();
 const db = require('./db'); 
 const path = require('path');
 
+require('dotenv').config();
+
 // --- IMPORT DES FICHIERS SÉPARÉS ---
 const register = require('./register');
 const login = require('./login');
@@ -14,6 +16,7 @@ const checkAdmin = require('./adminMiddleware');
 const Video = require('./model/Video');
 const User = require('./model/Users');
 const Participant = require('./model/Participant');
+const VideoSearch = require('./model/VideoSearchService');
 
 // --- MIDDLEWARE (Indispensable pour lire le JSON) ---
 app.use(express.json());
@@ -195,6 +198,24 @@ app.get('/rooms/:roomId/participants', authenticateToken, async (req, res) => {
 
 app.delete('/admin/delete-video', authenticateToken, checkAdmin, (req, res) => {
     res.json({ message: "SUPPRESSION RÉUSSIE ! (Seul un admin peut voir ça)" });
+});
+
+app.get('/search', async (req, res) => {
+    const query = req.query.q;
+
+    if (!query) {
+        return res.status(400).json({ error: 'Le paramètre de recherche "q" est manquant.' });
+    }
+
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    const maxResults = 5;
+
+    const search = new VideoSearch(apiKey);
+    const data = await search.searchYoutube(query,maxResults);
+
+    if(data) res.json(data);
+    else res.status(500).json({ error: 'Erreur Youtube' })
+
 });
 
 
