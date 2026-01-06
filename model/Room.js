@@ -19,6 +19,7 @@ class Room {
 		this.listeParticipants.add(admin);
 		this.admin = new Set();
 		this.admin.add(admin);
+		this.playerstate = new PlayerState();
 	}
 	
 	async create(admin){
