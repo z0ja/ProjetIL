@@ -1,12 +1,19 @@
-require("./Participant.js");
-// const room = require("../room/index.js"); // Pas utile pour le moment
-// const broadcast = require("../room/broadcast.js"); // Pas utile pour le moment
-const playlist = require("./Playlist.js");
+
+//const playlist = require("./Playlist.js");
 const db = require('../db');
 
 class Room {
-    // Variable statique pour garder en mémoire les IDs utilisés (attention, ça se vide si le serveur redémarre)
-    static listId = new Set();
+	static listId = new Set();
+	constructor(name, admin){
+		if(!admin){ // il faut être login
+			throw new Error("il faut être login pour pouvoir créer une room");
+		}
+
+		// génère une id random pour la room
+		do{
+			this.id = Math.floor(Math.random()*100000);
+		} while(Room.listId.has(this.id));
+		Room.listId.add(this.id);
 
     constructor(name) { 
         // 1. Génération d'ID corrigée
@@ -46,11 +53,12 @@ class Room {
         }
     }
 
-    // Ces méthodes ne servent plus trop si tu utilises la classe Participant pour gérer la BDD
-    // Mais tu peux les garder pour de la logique interne si besoin
-    join(participant){
-        // this.listeParticipants.add(participant);
-    }
+
+	join(participant){
+		if(!this.listeParticipants.has(participant)){
+			this.listeParticipants.add(participant);
+		}
+	}
 
     leave(participant){
         // this.listeParticipants.delete(participant);

@@ -120,3 +120,18 @@ chatSocket.on("chat message", ({username, msg}) => {
 chatSocket.on("connect_error", (err) => {
     console.error("Chat socket error", err.message);
 });
+
+// ==============================
+// ROOM SOCKET (port 3004)
+// ==============================
+
+//const roomSocket = io("http://localhost:3004", {
+//    auth: {
+//        token: localStorage.getItem("token")
+//    }
+//});
+//
+//roomSocket.on("room creation", (roomName, user) =>{
+//	console.log("test");
+//	console.log(roomName, user);
+//});

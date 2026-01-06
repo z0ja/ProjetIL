@@ -7,12 +7,13 @@ class Video {
      * @param {number|null} id 
      */
 
-    constructor(videoId="",title="",url="") {
+    constructor(videoId="",title="",url="",img="") {
         this.videoId = videoId;
         this.title = title;
         this.url = url;
+        this.img = img;
 
-        if(typeof this.videoId !== "string" || typeof this.title !== "string" || typeof this.url !== "string"){
+        if(typeof this.videoId !== "string" || typeof this.title !== "string" || typeof this.url !== "string" || typeof this.img !== "string"){
             throw new Error("Constructor arguments types not corresponding with the given ones");
         }
     }
