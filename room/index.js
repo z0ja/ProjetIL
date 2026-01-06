@@ -5,7 +5,6 @@ import { dirname, join } from 'node:path';
 import { Server } from 'socket.io';
 
 import PlayerState from "../model/PlayerState.mjs";
-import * as broadcast from "./broadcast.js";
 
 import Room from '../model/Room.js';
 import Participant from "../model/Participant.js";
@@ -86,7 +85,7 @@ io.on('connection', (socket) => {
 		// a faire verifier si l'utilisateur est un admin
 		// a faire mettre a jour l'attribut de type playerstate de la classe Room
 		playerState= new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"]);
-		broadcast.broadcastPlayerState(playerState, lastUser, io);
+		broadcastPlayerState(playerState, lastUser, io);
 	});
 
 	socket.on('setState', (data) => {
@@ -102,7 +101,7 @@ io.on('connection', (socket) => {
 		io.emit("getState",lastUser);
 	}
 
-	broadcast.sendPlayerState(playerState,socket);
+	sendPlayerState(playerState,socket);
 
 	socket.on('changeState', (data) => {
     	console.log(data); 
@@ -110,7 +109,7 @@ io.on('connection', (socket) => {
 		// a faire mettre a jour l'attribut de type playerstate de la classe Room
 		playerState= new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"]);
 		lastUser = data["user"];
-		broadcast.broadcastPlayerState(playerState, data["user"], io);
+		broadcastPlayerState(playerState, data["user"], io);
   	});
 
 	socket.on('disconnect', () => {
