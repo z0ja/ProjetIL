@@ -31,9 +31,10 @@
 			}
 		});
 
-		socket.on('accepted', (room, userId) => {
+		socket.on('accepted', (room, userId, listeParticipant) => {
 			console.log(room);
 			localStorage.setItem('roomObject', JSON.stringify(room));
+			localStorage.setItem('listeParticipant', JSON.stringify(listeParticipant));
 			window.location.href = "./room.html";
 		});
 	</script>

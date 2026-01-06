@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
 		room.join(admin);
 		mapRoom.set(String(room.id), room);
 
-		socket.emit('room object', (room));
+		socket.emit('room object', room, room.listeParticipants); // liste participants sera vide
 		console.log('=== NEW ROOM ===');
 		console.log(roomName, room.id);
 	});
@@ -75,7 +75,7 @@ io.on('connection', (socket) => {
 			const newParticipant = new Participant(userId, roomId, false);
 			mapRoom.get(roomId).join(newParticipant);
 			console.log(mapRoom.get(roomId));
-			socket.emit('accepted', mapRoom.get(roomId), userId);
+			socket.emit('accepted', mapRoom.get(roomId), userId, JSON.stringify(mapRoom.get(roomId).listeParticipants));
 		}
 	});
 

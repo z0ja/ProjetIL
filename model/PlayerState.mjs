@@ -49,3 +49,5 @@ export default class PlayerState {
         };
     }
 }
+
+//module.exports = Room;
