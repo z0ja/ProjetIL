@@ -8,12 +8,12 @@ export class VideoPlayer {
      * @param {PlayerState} player
      * @param {Object} participant
      */
-    constructor(video=null,player=null, participant=null) {
+    constructor(video=null,player=null) {
         console.log("test");
         
         this.currentTime = 0;
         this.currentVideo = video;
-        this.currentParticipant = participant;
+        this.currentParticipant = localStorage.getItem("user");
 
         if((video !== null && !(video instanceof Video)) || (player !== null && !(player instanceof PlayerState))){
             throw new Error("Constructor arguments types not corresponding with the given ones");
@@ -35,7 +35,7 @@ export class VideoPlayer {
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         this.jump = 0;
-        if(this.currentParticipant.isAdmin) this.JUMP_MAX = 6;
+        if(this.isAdmin()) this.JUMP_MAX = 6;
         else this.JUMP_MAX = 1;
 
         let id;
@@ -83,7 +83,7 @@ export class VideoPlayer {
 
             this.currentState.setStatus("played");
 
-            if(this.currentParticipant.isAdmin){
+            if(this.isAdmin()){
                 this.sendState("changeState");
             }
 
@@ -98,18 +98,18 @@ export class VideoPlayer {
         } 
         
         else {
-            if(this.jump != 0 && this.currentParticipant.isAdmin) this.jump += 1;
+            if(this.jump != 0 && this.isAdmin()) this.jump += 1;
             
             if(this.currentState.getStatus() === "played" && this.jump == 0){
             console.log("video en pause");
             this.currentState.setStatus("paused");
 
-            if(this.currentParticipant.isAdmin){
+            if(this.isAdmin()){
                 this.sendState("changeState");
             }
             }
 
-            if(this.jump > this.JUMP_MAX && this.currentParticipant.isAdmin) this.jump = 0;
+            if(this.jump > this.JUMP_MAX && this.isAdmin()) this.jump = 0;
             clearInterval(this.interval);
         }
     }
@@ -121,7 +121,7 @@ export class VideoPlayer {
         if (diff > 2) {
             console.log("temps avancer");
 
-            if(this.currentParticipant.isAdmin){
+            if(this.isAdmin()){
                 this.currentTime = time;
                 if(this.jump == 0) this.sendState("changeState");
             }
@@ -134,7 +134,7 @@ export class VideoPlayer {
         else if (diff < -1) {
             console.log("temps reculer");
 
-            if(this.currentParticipant.isAdmin){
+            if(this.isAdmin()){
                 this.currentTime = time;
                 if(this.jump == 0) this.sendState("changeState");
             }
@@ -218,5 +218,10 @@ export class VideoPlayer {
 
     getUser(){
         return this.user;
+    }
+
+    isAdmin(){
+        let room = localStorage.getItem("roomObject");
+        return room.admin.has(this.currentParticipant.id);
     }
 }
