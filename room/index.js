@@ -30,6 +30,21 @@ app.get('/', (req, res) => {
 	res.sendFile(join(__dirname, '../public/pages/room-make.html'));
 });
 
+function broadcastPlayerState(state,user,io){
+    let json = state.toJson();
+    json['user'] = user; // ajouter l'utilisateur qui a fait l'action pour faire en sorte de ne pas changer son 'PlayerState'
+
+    io.emit('changeState',json)
+}
+
+function sendPlayerState(state,socket){
+    console.log("envoie de state");
+    let json = state.toJson();
+    json['user'] = "";
+    
+    socket.emit('changeState',json);
+}
+
 // test
 var playerState = new PlayerState("played",0,"M7lc1UVf-VE");
 var lastUser = null;
