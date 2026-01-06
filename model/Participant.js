@@ -59,6 +59,21 @@ class Participant {
             throw err;
         }
     }
+
+    static async isRoomAdmin(userId, roomId) {
+    const query = `
+        SELECT is_admin 
+        FROM participants 
+        WHERE user_id = $1 AND room_id = $2
+    `;
+    const result = await db.query(query, [userId, roomId]);
+
+    // Si on trouve que is_admin est true
+    if (result.rows.length > 0 && result.rows[0].is_admin === true) {
+        return true;
+    }
+    return false;
+}
 }
 
 module.exports = Participant;

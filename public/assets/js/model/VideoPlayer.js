@@ -6,12 +6,14 @@ export class VideoPlayer {
      * 
      * @param {Video} video 
      * @param {PlayerState} player
+     * @param {Object} participant
      */
-    constructor(video=null,player=null) {
+    constructor(video=null,player=null, participant=null) {
         console.log("test");
         
         this.currentTime = 0;
         this.currentVideo = video;
+        this.currentParticipant = participant;
 
         if((video !== null && !(video instanceof Video)) || (player !== null && !(player instanceof PlayerState))){
             throw new Error("Constructor arguments types not corresponding with the given ones");
@@ -32,10 +34,8 @@ export class VideoPlayer {
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        this.admin = false; //temporaire
-        this.user = Math.floor(Math.random() * 100).toString(); //temporaire user aleatoire
         this.jump = 0;
-        if(this.admin) this.JUMP_MAX = 6;
+        if(this.currentParticipant.isAdmin) this.JUMP_MAX = 6;
         else this.JUMP_MAX = 1;
 
         let id;
@@ -83,7 +83,7 @@ export class VideoPlayer {
 
             this.currentState.setStatus("played");
 
-            if(this.admin){
+            if(this.currentParticipant.isAdmin){
                 this.sendState("changeState");
             }
 
@@ -98,18 +98,18 @@ export class VideoPlayer {
         } 
         
         else {
-            if(this.jump != 0 && this.admin) this.jump += 1;
+            if(this.jump != 0 && this.currentParticipant.isAdmin) this.jump += 1;
             
             if(this.currentState.getStatus() === "played" && this.jump == 0){
             console.log("video en pause");
             this.currentState.setStatus("paused");
 
-            if(this.admin){
+            if(this.currentParticipant.isAdmin){
                 this.sendState("changeState");
             }
             }
 
-            if(this.jump > this.JUMP_MAX && this.admin) this.jump = 0;
+            if(this.jump > this.JUMP_MAX && this.currentParticipant.isAdmin) this.jump = 0;
             clearInterval(this.interval);
         }
     }
@@ -121,7 +121,7 @@ export class VideoPlayer {
         if (diff > 2) {
             console.log("temps avancer");
 
-            if(this.admin){
+            if(this.currentParticipant.isAdmin){
                 this.currentTime = time;
                 if(this.jump == 0) this.sendState("changeState");
             }
@@ -134,7 +134,7 @@ export class VideoPlayer {
         else if (diff < -1) {
             console.log("temps reculer");
 
-            if(this.admin){
+            if(this.currentParticipant.isAdmin){
                 this.currentTime = time;
                 if(this.jump == 0) this.sendState("changeState");
             }
@@ -211,13 +211,10 @@ export class VideoPlayer {
         this.currentState.setTime(this.currentTime);
 
         let json = this.currentState.toJson();
-        json["user"] = this.user;
+        json["user"] = this.currentParticipant.username;
         window.socket.emit(event,json);
     }
 
-    setAdmin(admin){ //temporaire
-        this.admin = admin;
-    }
 
     getUser(){
         return this.user;

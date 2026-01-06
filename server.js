@@ -15,6 +15,8 @@ const Video = require('./model/Video');
 const User = require('./model/Users');
 const Participant = require('./model/Participant');
 
+const Room = require('./model/Room');
+
 // --- MIDDLEWARE (Indispensable pour lire le JSON) ---
 app.use(express.json());
 app.use(cookieParser());
@@ -193,8 +195,55 @@ app.get('/rooms/:roomId/participants', authenticateToken, async (req, res) => {
     }
 });
 
+app.post('/rooms/:roomId/action', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;      
+        const roomId = req.params.roomId;
+        const action = req.body.action;  
+        
+        const isAdmin = await Participant.isRoomAdmin(userId, roomId);
+
+        if (!isAdmin) {
+            return res.status(403).json({ 
+                error: "Seul l'admin peut toucher à la télécommande." 
+            });
+        }
+
+        console.log(`L'admin ${req.user.username} a fait l'action : ${action}`);
+        
+        res.json({ message: "Action validée", action: action });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur serveur" });
+    }
+});
+
+app.post('/rooms', authenticateToken, async (req, res) => {
+    try {
+        const { name } = req.body; 
+        const userId = req.user.id; 
+
+        const newRoom = new Room(name); 
+        await newRoom.save(); 
+
+        const adminParticipant = new Participant(userId, newRoom.id, true);
+        
+        await adminParticipant.join();
+
+        res.status(201).json({ 
+            message: "Room créée avec succès !", 
+            room: newRoom 
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la création de la room." });
+    }
+});
+
 app.delete('/admin/delete-video', authenticateToken, checkAdmin, (req, res) => {
-    res.json({ message: "SUPPRESSION RÉUSSIE ! (Seul un admin peut voir ça)" });
+    res.json({ message: "SUPPRESSION RÉUSSIE ! (Seul un admin peut faire ça)" });
 });
 
 
