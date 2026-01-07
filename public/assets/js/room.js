@@ -9,38 +9,35 @@ if (!token) {
 }
 
 // ==============================
-// Video SOCKET (port 3003)
+// Video SOCKET (port 3004)
 // ==============================
 
-window.socket = io("http://localhost:3004", {
-    auth: {
-        token: token
-    }
-});
-
-// window.player
 window.player = new VideoPlayer();
 
-// Admin Temporaire 
-window.player.setAdmin(true);
+window.socket = io("http://localhost:3004");
 
-// Syncho serveur
-socket.on("changeState", (data) => {
-    if (data.user !== window.player.getUser()) {
-        const state = new PlayerState(
-            data.videoId,
-            data.status,
-            parseInt(data.time)
-        );
+let roomid = JSON.parse(localStorage.getItem("roomObject")).id;
+
+socket.on('changeState', function(data){
+    console.log(data);
+    console.log(data["status"]);
+    console.log(data["room"]);
+
+    if(data["room"] == roomid && data["user"] !== window.player.getUser()){
+        let state = new PlayerState(data["videoId"], data["status"] ,parseInt(data["time"]));
+        //window.player.setAdmin(false);//temporaire
         window.player.setState(state);
     }
 });
 
-socket.on("getState", (user) => {
-    if (user === window.player.getUser()) {
+socket.on('getState',function(data){
+    console.log(data);
+    if(data == window.player.getUser()){
         window.player.sendState("getState");
     }
 });
+
+socket.emit("joinVideo",roomid);
 
 // Boutons suivi
 document.getElementById("playBtn").addEventListener("click", () => {
