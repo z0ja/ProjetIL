@@ -1,42 +1,67 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <head>
-	<meta charset="utf-8">
-	<title>créez votre room</title>
-    </head>
-    <body>
-	<form id="join-room-form">
-		<label for="room-name">ID de la room</label>
-		<input type="text" id="room-name" name="room-name" required>
-		<button type="submit">rejoindre</button>
-	</form>
-	<div id="error"></div>
-    </body>
-	<script src="http://localhost:3004/socket.io/socket.io.js"></script>
-	<script>
-		const socket = io(":3004");
-		const user = JSON.parse(localStorage.getItem("user"));
-		let currentRoomId = null;
+<head>
+    <meta charset="utf-8">
+    <title>Rejoindre une room</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-		document.getElementById("join-room-form").addEventListener("submit", (e) => {
-			document.getElementById("error").innerHTML = "";
-			e.preventDefault();
-			currentRoomId = document.getElementById("room-name").value;
-			socket.emit("user connect", currentRoomId, user.id);
-		});
+    <!-- Bootstrap -->
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/styles.css" rel="stylesheet">
+</head>
 
-		socket.on('no id', (userId) => {
-			if(userId == user.id){
-				document.getElementById("error").innerHTML = "cette ID ne correspond à aucune room";
-			}
-		});
+<body class="bg-light d-flex align-items-center justify-content-center vh-100">
 
-		socket.on('accepted', (room, userId, listeParticipant) => {
-			console.log(room);
-			localStorage.setItem('roomObject', JSON.stringify(room));
-			localStorage.setItem('listeParticipant', JSON.stringify(listeParticipant));
-			window.location.href = "./room.html";
-		});
-	</script>
+    <div class="card shadow-sm p-4" style="max-width: 400px; width: 100%;">
+        <h2 class="text-center mb-4">🔗 Rejoindre une room</h2>
+
+        <form id="join-room-form">
+            <div class="mb-3">
+                <label for="room-name" class="form-label">ID de la room</label>
+                <input
+                    type="text"
+                    id="room-name"
+                    name="room-name"
+                    class="form-control"
+                    placeholder="Ex : 56792"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                Rejoindre
+            </button>
+        </form>
+
+        <div id="error" class="text-danger text-center mt-3"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="http://localhost:3004/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io(":3004");
+        const user = JSON.parse(localStorage.getItem("user"));
+        let currentRoomId = null;
+
+        document.getElementById("join-room-form").addEventListener("submit", (e) => {
+            document.getElementById("error").innerHTML = "";
+            e.preventDefault();
+            currentRoomId = document.getElementById("room-name").value;
+            socket.emit("user connect", currentRoomId, user.id);
+        });
+
+        socket.on('no id', (userId) => {
+            if(userId == user.id){
+                document.getElementById("error").innerHTML =
+                    "Cette ID ne correspond à aucune room";
+            }
+        });
+
+        socket.on('accepted', (room, userId, listeParticipant) => {
+            localStorage.setItem('roomObject', JSON.stringify(room));
+            localStorage.setItem('listeParticipant', JSON.stringify(listeParticipant));
+            window.location.href = "./room.html";
+        });
+    </script>
+</body>
 </html>
-
