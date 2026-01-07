@@ -26,7 +26,7 @@ document.querySelector("form").addEventListener("submit", async (e) => {
         localStorage.setItem("user", JSON.stringify(data.user));
 
         // Redirection
-        window.location.href = "room.html";
+        window.location.href = "../index.html";
 
     } catch (error) {
         console.error(error);

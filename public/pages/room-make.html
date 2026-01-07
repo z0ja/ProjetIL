@@ -1,36 +1,61 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <head>
-	<meta charset="utf-8">
-	<title>créez votre room</title>
-    </head>
-    <body>
-	<form id="create-room-form">
-		<label for="room-name">Nom de la room</label>
-		<input type="text" id="room-name" name="room-name" required>
-		<button type="submit">Créer</button>
-	</form>
-	<div id="room-id"></div>
-    </body>
-	<script src="http://localhost:3004/socket.io/socket.io.js"></script>
-	<script>
-		const socket = io(":3004");
-		document.getElementById("create-room-form").addEventListener("submit", (e) => {
-    		e.preventDefault();
+<head>
+    <meta charset="utf-8">
+    <title>Créer une room</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-			const userId = JSON.parse(localStorage.getItem("user")).id;
-			const roomName = document.getElementById("room-name").value;
+    <!-- Bootstrap -->
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/styles.css" rel="stylesheet">
+</head>
 
-			console.log(roomName, userId);
-			socket.emit("room creation", roomName, userId);
-		});
+<body class="bg-light d-flex align-items-center justify-content-center vh-100">
 
-		socket.on('room object', (room, listeParticipant) =>{
-			document.getElementById('room-id').innerHTML = room.id;
-			localStorage.setItem("roomObject", JSON.stringify(listeParticipant));
-			console.log('room: ', JSON.stringify(room), JSON.stringify(listeParticipant));
-			//window.location.href = "./room.html";
-		});
-	</script>
+    <div class="card shadow-sm p-4 text-center" style="max-width: 400px; width: 100%;">
+        <h2 class="mb-4">Créer une room</h2>
+
+        <form id="create-room-form">
+            <div class="mb-3 text-start">
+                <label for="room-name" class="form-label">Nom de la room</label>
+                <input
+                    type="text"
+                    id="room-name"
+                    name="room-name"
+                    class="form-control"
+                    placeholder="Ex : Soirée Films"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">
+                Créer la room
+            </button>
+        </form>
+
+        <div id="room-id" class="mt-4 fw-bold text-primary"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="http://localhost:3004/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io(":3004");
+
+        document.getElementById("create-room-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const userId = JSON.parse(localStorage.getItem("user")).id;
+            const roomName = document.getElementById("room-name").value;
+
+            socket.emit("room creation", roomName, userId);
+        });
+
+        socket.on('room object', (room, listeParticipant) =>{
+            document.getElementById('room-id').innerHTML =
+                "ID de la room : <span class='text-dark'>" + room.id + "</span>";
+
+            localStorage.setItem("roomObject", JSON.stringify(listeParticipant));
+        });
+    </script>
+</body>
 </html>
-
