@@ -9,6 +9,117 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #fcfcfc; }
+        
+        .navbar { margin-bottom: 20px; border-bottom: 1px solid #eee; }
+        
+        /* Zone Vidéo */
+        #video-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-color: #000;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #video-iframe { width: 100%; height: 100%; border: none; }
+
+        /* Contrôles */
+        .controls-area {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center; /* Centrer les boutons */
+            margin-bottom: 20px;
+        }
+
+        /* Playlist */
+        .playlist-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .playlist-header {
+            background-color: #f1f3f5;
+            padding: 10px 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .playlist-item:hover { background-color: #f9f9f9; }
+        
+        /* Style pour la vidéo en cours de lecture */
+        .playlist-item.active {
+            background-color: #e7f1ff;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .playlist-thumb {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+            background: #eee;
+        }
+        .playlist-info { flex-grow: 1; overflow: hidden; }
+        .playlist-title { font-weight: 600; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .playlist-desc { font-size: 0.8em; color: #666; }
+
+        /* Chat & Sidebar */
+        .sidebar-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .sidebar-header {
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+        }
+        .sidebar-body { padding: 15px; min-height: 150px; }
+
+        /* Modale Recherche */
+        .video-card-small {
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            border-radius: 6px;
+            align-items: center;
+            background: #fff;
+        }
+        .video-card-small img { width: 120px; height: auto; border-radius: 4px; }
+        .video-card-info { flex-grow: 1; font-size: 0.9em; }
+        .video-card-info h6 { margin: 0 0 5px 0; font-size: 1em; font-weight: bold; }
+    </style>
     
     <title id="titre">Room - W2G</title>
 </head>
@@ -38,6 +149,15 @@
                 </p>
             </div>
         </div>
+
+        <div class="row mb-2">
+            <div class="col-12 text-end">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#searchModal">
+                    🔍 Ajouter une vidéo
+                </button>
+            </div>
+        </div>
+
     </section>
 
     <section class="container">
@@ -49,14 +169,25 @@
                 </div>
                 <!-- Contrôles de lecture (simulés, à synchroniser via JS/WebSockets) -->
                 <div class="d-flex justify-content-center gap-3 mb-4">
+                    <button class="btn btn-outline-secondary" onclick="playPrev()">⏮ Préc</button>
                     <button class="btn btn-primary" id="playBtn"><i class="bi bi-play-fill"></i> Play</button>
                     <button class="btn btn-secondary" id="pauseBtn"><i class="bi bi-pause-fill"></i> Pause</button>
                     <button class="btn btn-info" id="syncBtn"><i class="bi bi-arrow-clockwise"></i> Synchroniser</button>
+                    <button class="btn btn-outline-secondary" onclick="playNext()">Suiv ⏭</button>
                 </div>
                 <!-- Champ pour changer de vidéo -->
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" id="videoUrl" placeholder="Collez l'URL d'une vidéo YouTube ou sélectionnez dans la bibliothèque">
                     <button class="btn btn-outline-secondary" id="loadVideoBtn">Charger</button>
+                </div>
+
+                <div class="playlist-card">
+                    <div class="playlist-header">
+                        <span>📋 Playlist</span>
+                        <span class="badge bg-secondary" id="playlist-count">0 vidéos</span>
+                    </div>
+                    <div id="playlist-list">
+                        </div>
                 </div>
             </div>
             
@@ -102,6 +233,29 @@
         </div>
     </section>
 
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Rechercher une vidéo YouTube</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <input type="text" id="modalSearchInput" class="form-control" placeholder="Rechercher (ex: Jul)...">
+                        <button class="btn btn-primary" onclick="performModalSearch()">Rechercher</button>
+                    </div>
+                    <div id="modalResultsContainer" style="max-height: 400px; overflow-y: auto;">
+                        <p class="text-muted text-center">Les résultats s'afficheront ici...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="container">
         <div>
             <hr>
@@ -127,5 +281,164 @@
 		document.getElementById("room-name").innerHTML = "Room "+room.name;
 		document.getElementById("room-id").innerHTML = "id: "+room.id;
 	</script>
+
+
+    <script type="module">
+        import {Video} from "../assets/js/model/Video.js"
+        
+        const SERVER_URL = 'http://localhost:3002/search'; 
+
+        // --- 1. DONNÉES DE LA PLAYLIST (Fausses vidéos par défaut) ---
+        let playlist = [
+            {
+                id: 'M7lc1UVf-VE',
+                title: 'Video par defaut',
+                thumb: 'https://img.youtube.com/vi/rTwzswSVjbo/mqdefault.jpg'
+            },
+            {
+                id: 'ePiF7BWB6_s',
+                title: 'Pourquoi 0.1 + 0.2 = 0.30000000000000004 ?',
+                thumb: 'https://i.ytimg.com/vi/ePiF7BWB6_s/default.jpg'
+            }
+        ];
+
+        let currentIndex = 0; // On commence par la première vidéo
+
+        // --- 2. FONCTIONS DE GESTION DU LECTEUR ---
+
+        // Appelé au chargement de la page
+        window.onload = function() {
+            renderPlaylist(); // Afficher la liste
+            loadVideoAtIndex(0); // Charger la première
+        };
+
+        function loadVideoAtIndex(index) {
+            if (index < 0 || index >= playlist.length) return; // Sécurité
+
+            currentIndex = index;
+            const video = playlist[index];
+            
+            const video_ = new Video(video.id);
+            window.player.loadVideo(video_);
+            window.player.sendState("changeState");
+
+            // Mise à jour visuelle de la liste
+            renderPlaylist();
+        }
+
+        // Bouton SUIVANT
+        function playNext() {
+            if (currentIndex < playlist.length - 1) {
+                loadVideoAtIndex(currentIndex + 1);
+            } else {
+                alert("C'est la dernière vidéo !");
+            }
+        }
+
+        // Bouton PRÉCÉDENT
+        function playPrev() {
+            if (currentIndex > 0) {
+                loadVideoAtIndex(currentIndex - 1);
+            } else {
+                alert("Vous êtes au début de la playlist.");
+            }
+        }
+
+        // --- 3. GESTION DE L'AFFICHAGE DE LA PLAYLIST ---
+        
+        function renderPlaylist() {
+            const listContainer = document.getElementById('playlist-list');
+            const countLabel = document.getElementById('playlist-count');
+            
+            listContainer.innerHTML = ''; // On vide la liste actuelle
+            countLabel.innerText = playlist.length + " vidéos";
+
+            playlist.forEach((video, index) => {
+                // On vérifie si c'est la vidéo active
+                const isActive = (index === currentIndex) ? 'active' : '';
+                const statusText = (index === currentIndex) ? '▶ Lecture en cours' : 'En attente';
+
+                const itemHTML = `
+                    <div class="playlist-item ${isActive}" onclick="loadVideoAtIndex(${index})">
+                        <img src="${video.thumb}" class="playlist-thumb" alt="thumb">
+                        <div class="playlist-info">
+                            <div class="playlist-title">${video.title}</div>
+                            <div class="playlist-desc">${statusText}</div>
+                        </div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', itemHTML);
+            });
+        }
+
+        // --- 4. RECHERCHE & AJOUT (Reste identique) ---
+        async function performModalSearch() {
+            const query = document.getElementById('modalSearchInput').value;
+            const container = document.getElementById('modalResultsContainer');
+            if (!query) return;
+            container.innerHTML = '<div class="text-center p-3">Chargement...</div>';
+            try {
+                const response = await fetch(`${SERVER_URL}?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                displayModalResults(data.items);
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = `<p class="text-danger">Erreur: ${error.message}</p>`;
+            }
+        }
+
+        function displayModalResults(videos) {
+            const container = document.getElementById('modalResultsContainer');
+            container.innerHTML = ''; 
+            if (!videos || videos.length === 0) {
+                container.innerHTML = '<p>Aucune vidéo trouvée.</p>';
+                return;
+            }
+            for (const item of videos) {
+                if (item.id.kind !== 'youtube#video') continue;
+                const title = item.snippet.title;
+                const thumbnail = item.snippet.thumbnails.default.url;
+                const videoId = item.id.videoId;
+                const safeTitle = title.replace(/'/g, "\\'"); 
+
+                const div = document.createElement('div');
+                div.className = 'video-card-small';
+                div.innerHTML = `
+                    <img src="${thumbnail}" alt="miniature">
+                    <div class="video-card-info">
+                        <h6>${title}</h6>
+                    </div>
+                    <button class="btn btn-sm btn-success" onclick="addVideoToPlaylist('${videoId}', '${safeTitle}', '${thumbnail}')">
+                        Ajouter
+                    </button>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function addVideoToPlaylist(videoId, title, thumbnail) {
+            // Ajouter au tableau JS
+            playlist.push({ id: videoId, title: title, thumb: thumbnail });
+            
+            // Mettre à jour l'affichage
+            renderPlaylist();
+
+            // Fermer la modale
+            const modalElement = document.getElementById('searchModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            modalInstance.hide();
+            
+            // Si c'était la seule vidéo (la liste était vide avant), on la lance
+            if (playlist.length === 1) {
+                loadVideoAtIndex(0);
+            }
+        }
+
+        window.loadVideoAtIndex = loadVideoAtIndex;
+        window.playNext = playNext;
+        window.playPrev = playPrev;
+        window.performModalSearch = performModalSearch;
+        window.addVideoToPlaylist = addVideoToPlaylist;
+    </script>
 </body>
 </html>
