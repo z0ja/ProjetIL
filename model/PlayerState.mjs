@@ -5,7 +5,7 @@ export default class PlayerState {
      * @param {number} time 
      * @param {string} videoId 
      */
-    constructor(status="paused",time=0,videoId) {
+    constructor(status="paused",time=0,videoId="") {
         this.status = status;
         this.time = time;
         this.videoId = videoId;

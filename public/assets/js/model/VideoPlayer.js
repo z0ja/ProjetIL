@@ -6,14 +6,13 @@ export class VideoPlayer {
      * 
      * @param {Video} video 
      * @param {PlayerState} player
-     * @param {Object} participant
      */
     constructor(video=null,player=null) {
         console.log("test");
         
         this.currentTime = 0;
         this.currentVideo = video;
-        this.currentParticipant = localStorage.getItem("user");
+        this.currentParticipant = JSON.parse(localStorage.getItem("user"));
 
         if((video !== null && !(video instanceof Video)) || (player !== null && !(player instanceof PlayerState))){
             throw new Error("Constructor arguments types not corresponding with the given ones");
@@ -37,6 +36,7 @@ export class VideoPlayer {
         this.jump = 0;
         if(this.isAdmin()) this.JUMP_MAX = 6;
         else this.JUMP_MAX = 1;
+        this.JUMP_MAX = 1; // desactive plusieur admin
 
         let id;
         if (video === null) id = '';
@@ -211,17 +211,18 @@ export class VideoPlayer {
         this.currentState.setTime(this.currentTime);
 
         let json = this.currentState.toJson();
-        json["user"] = this.currentParticipant.username;
+        json["user"] = this.currentParticipant.id;
+        json["room"] = JSON.parse(localStorage.getItem("roomObject")).id;
         window.socket.emit(event,json);
     }
 
 
     getUser(){
-        return this.user;
+        return this.currentParticipant.id;
     }
 
     isAdmin(){
-        let room = localStorage.getItem("roomObject");
-        return room.admin.has(this.currentParticipant.id);
+        let room = JSON.parse(localStorage.getItem("roomObject"));
+        return room.admin.includes(this.currentParticipant.id);
     }
 }

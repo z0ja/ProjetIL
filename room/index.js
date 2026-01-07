@@ -29,17 +29,19 @@ app.get('/', (req, res) => {
 	res.sendFile(join(__dirname, '../public/pages/room-make.html'));
 });
 
-function broadcastPlayerState(state,user,io){
+function broadcastPlayerState(state,user,room,io){
     let json = state.toJson();
     json['user'] = user; // ajouter l'utilisateur qui a fait l'action pour faire en sorte de ne pas changer son 'PlayerState'
+	json['room'] = room;
 
     io.emit('changeState',json)
 }
 
-function sendPlayerState(state,socket){
+function sendPlayerState(state,room,socket){
     console.log("envoie de state");
     let json = state.toJson();
     json['user'] = "";
+	json['room'] = room;
     
     socket.emit('changeState',json);
 }
@@ -56,6 +58,7 @@ io.on('connection', (socket) => {
 	// TODO: changer les username en user id et aller chercher les infos dans la bdd
 	socket.on('room creation', (roomName, userId) => {
 		const room = new Room(roomName, userId);
+		room.playerstate = new PlayerState("played",0,"M7lc1UVf-VE");
 		//console.log(userId, room.id);
 		const admin = new Participant(userId, String(room.id), true);
 		room.join(admin);
@@ -85,31 +88,49 @@ io.on('connection', (socket) => {
 		// a faire verifier si l'utilisateur est un admin
 		// a faire mettre a jour l'attribut de type playerstate de la classe Room
 		playerState= new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"]);
-		broadcastPlayerState(playerState, lastUser, io);
+		broadcastPlayerState(playerState, mapRoom.get(String(data["room"])).lastUser,data["room"], io);
 	});
 
 	socket.on('setState', (data) => {
 		console.log("setState");
 		
-		if(lastUser){
-			io.emit("getState",lastUser);
+		if(mapRoom.get(String(data["room"])).lastUser){
+			io.emit("getState",mapRoom.get(String(data["room"])).lastUser);
 		}
 	});
 
+	socket.on('joinVideo',(data) => {
+		console.log("join video room "+data);
+		//console.log(mapRoom.get(String(data)).playerstate);
 
-	if(lastUser){
-		io.emit("getState",lastUser);
-	}
+		if(mapRoom.has(String(data))){
+			if(mapRoom.get(String(data)).lastUser){
+				io.emit("getState",mapRoom.get(String(data)).lastUser);
+			}
+			sendPlayerState(mapRoom.get(String(data)).playerstate ,mapRoom.get(String(data)).id ,socket);
+		}
+		else console.log("Room Id non reconnu");
+	})
 
-	sendPlayerState(playerState,socket);
+
+	// if(lastUser){
+	// 	io.emit("getState",lastUser);
+	// }
+
+	//sendPlayerState(playerState,socket);
 
 	socket.on('changeState', (data) => {
     	console.log(data); 
 		// a faire verifier si l'utilisateur est un admin
 		// a faire mettre a jour l'attribut de type playerstate de la classe Room
-		playerState= new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"]);
-		lastUser = data["user"];
-		broadcastPlayerState(playerState, data["user"], io);
+		// playerState= new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"]);
+
+		if(mapRoom.has(String(data["room"]))){
+			mapRoom.get(String(data["room"])).playerstate = new PlayerState(data["status"] ,parseInt(data["time"]), data["videoId"]);
+			mapRoom.get(String(data["room"])).lastUser = data["user"];
+			broadcastPlayerState(mapRoom.get(String(data["room"])).playerstate, data["user"], data["room"], io);
+		}
+		else console.log("changeState: Room Id non reconnu");
   	});
 
 	socket.on('disconnect', () => {

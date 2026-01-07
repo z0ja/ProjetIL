@@ -12,7 +12,7 @@ if (!token) {
 // Video SOCKET (port 3003)
 // ==============================
 
-window.socket = io("http://localhost:3003", {
+window.socket = io("http://localhost:3004", {
     auth: {
         token: token
     }
