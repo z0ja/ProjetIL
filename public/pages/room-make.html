@@ -25,10 +25,10 @@
 			socket.emit("room creation", roomName, userId);
 		});
 
-		socket.on('room object', (room) =>{
+		socket.on('room object', (room, listeParticipant) =>{
 			document.getElementById('room-id').innerHTML = room.id;
-			console.log('room: ', JSON.stringify(room));
-			localStorage.setItem("roomObject", JSON.stringify(room));
+			localStorage.setItem("roomObject", JSON.stringify(listeParticipant));
+			console.log('room: ', JSON.stringify(room), JSON.stringify(listeParticipant));
 			//window.location.href = "./room.html";
 		});
 	</script>

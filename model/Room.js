@@ -1,5 +1,6 @@
 //const playlist = require("./Playlist.js");
 const db = require('../db');
+//require('./PlayerState.js');
 
 class Room {
 	static listId = new Set();
@@ -40,9 +41,12 @@ class Room {
 	}
 
 	join(participant){
-		if(!this.listeParticipants.has(participant)){
-			this.listeParticipants.add(participant);
-		}
+		for (const p of this.listeParticipants) {
+			if (p.userId === participant.userId) {
+				return; // participant already in the set
+			}
+	  }
+	  this.listeParticipants.add(participant);
 	}
 
 	leave(participant){
