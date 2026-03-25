@@ -37,6 +37,13 @@ socket.on('getState',function(data){
     }
 });
 
+// Gestion des participants
+// socket.on("participants update", (listeParticipant) => {
+//     localStorage.setItem("listeParticipant", JSON.stringify(listeParticipant));
+//     renderParticipants();
+// });
+
+
 socket.emit("joinVideo",roomid);
 
 // Boutons suivi
@@ -132,3 +139,43 @@ chatSocket.on("connect_error", (err) => {
 //	console.log("test");
 //	console.log(roomName, user);
 //});
+
+// ==============================
+// Fonctions d'affichage liste participants
+// ==============================
+function renderParticipants() {
+    const participants = JSON.parse(localStorage.getItem("listeParticipant")) || [];
+    const room = JSON.parse(localStorage.getItem("roomObject"));
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+
+    const list = document.getElementById("participants-list");
+    const title = document.getElementById("participants-title");
+
+    list.innerHTML = "";
+    title.innerText = `Participants (${participants.length})`;
+
+    participants.forEach(p => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+
+        let label = p.username || "Utilisateur";
+
+        // Cas utilisateur courant
+        if (p.id === currentUser.id) {
+            label = "Vous";
+        }
+
+        // Badge hôte
+        if (p.id === room.admin) {
+            li.innerHTML = `
+                <span>${label}</span>
+                <span class="badge bg-warning text-dark">Hôte</span>
+            `;
+        } else {
+            li.innerHTML = `<span>${label}</span>`;
+        }
+
+        list.appendChild(li);
+    });
+}
+renderParticipants();
