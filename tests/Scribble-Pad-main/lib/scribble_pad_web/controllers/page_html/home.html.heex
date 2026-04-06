@@ -1,0 +1,29 @@
+<.flash_group flash={@flash} />
+<div class="border border-gray-300 max-w-2xl">
+  <div class="px-4 py-5 sm:p-6">
+    <h3 class="text-base font-semibold leading-6 text-gray-900">Create a Pad</h3>
+    <div class="mt-2 max-w-xl text-sm text-gray-500">
+      <p>Give your pad a name to start drawing with others</p>
+    </div>
+    <form class="mt-5 sm:flex sm:items-center" method="post">
+      <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()}>
+      <div class="w-full sm:max-w-xs">
+        <label for="text" class="sr-only">Name</label>
+        <input type="text" name="pad_name" id="text" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="my-scribble-pad" required autofocus>
+      </div>
+      <button type="submit" class="mt-3 inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:ml-3 sm:mt-0 sm:w-auto">Go</button>
+    </form>
+  </div>
+</div>
+
+<div :if={not Enum.empty?(@pads)} class="border border-gray-300 py-4 px-6 basis-52 mt-12 max-w-2xl">
+  <h3 class="text-base font-semibold leading-6 text-gray-900">Join a Pad</h3>
+  <div class="mt-2 max-w-xl text-sm text-gray-500 mb-6">
+    <p>Join an existing session to collaborate</p>
+  </div>
+  <ul class="divide-y divide-gray-100 divide-dashed text-gray-500">
+    <li :for={pad <- @pads} class="py-2">
+      <.link class="w-full hover:underline inline-flex items-center" href={~p"/pad/#{pad}"}><%= pad %><.icon class="ml-2 w-4 h-4" name="hero-chevron-right" /></.link>
+    </li>
+  </ul>
+</div>
