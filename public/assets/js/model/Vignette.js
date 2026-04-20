@@ -2,7 +2,9 @@ import {VideoPlayer} from "./VideoPlayer.js";
 
 export class Vignette extends VideoPlayer {
     constructor(video=null,player=null) {
+        console.log(player);
         super(video,player);
+        console.log(this.currentState);
     }
 
     initPlayer(videoId) {
@@ -22,6 +24,9 @@ export class Vignette extends VideoPlayer {
     }
 
     onPlayerReady(event){
-        super.setState(this.player);
+        console.log(this.currentState);
+        super.setState(this.currentState);
+        //this.pause();
+        this.interval = setInterval(() => this.pause(),1000);
     }
 }
