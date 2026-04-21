@@ -7,17 +7,20 @@
 </head>
 <body>
     <script>
-        let text = "test 1 2 3 [|M7lc1UVf-VE:120] test 4 5 6"
+        let text = "test 1 2 3 [|M7lc1UVf-VE:120] test 4 5 6 [|B7lc1UVf-VE:90]"
         function getVignette(text){
             let ancien = ""
             let video = ""
             let time = ""
             let begin_video = false
             let begin_time = false
+            let vignette = []
             for (let letter of text){
-                console.log(letter)
                 if(begin_time && letter == "]"){
                     begin_time = false
+                    vignette.push([video,Number(time)])
+                    video = ""
+                    time = ""
                 }
                 if(begin_time) {
                     time = time+letter
@@ -35,10 +38,11 @@
                 ancien = letter
             }
             
-            return [video,time]
+            return vignette
         }
 
         console.log(getVignette(text))
+        console.log(text.replace("[|"+getVignette(text)[0][0]+":"+getVignette(text)[0][1]+"]","+++[|"+getVignette(text)[0][0]+":"+getVignette(text)[0][1]+"]+++"))
     </script>
 </body>
 </html>

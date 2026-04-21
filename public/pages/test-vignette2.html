@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+</head>
+<body>
+    <script>
+        function action(id){
+            console.log("action "+window.vignettes[id][0])
+        }
+    </script>
+    <script type="module">
+        import {Vignette} from "../assets/js/model/Vignette.js";
+        let text = "test 1 2 3 [|M7lc1UVf-VE:120] test 4 5 6 [|B7lc1UVf-VE:90]"
+        window.vignettes = Vignette.getVignette(text)
+
+        let i = 0
+        for (let vignette of vignettes){
+            let replace = "[|"+vignette[0]+":"+vignette[1]+"]"
+            text = text.replace(replace,'<a style="color : blue;" onclick="action('+i+')">'+replace+"</a>")
+            i++
+        }
+
+        document.body.innerHTML = "<p>"+text+"</p>"
+
+    
+    </script>
+</body>
+</html>
