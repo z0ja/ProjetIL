@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Prototype : Filtres Avances (Dates)</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #007BFF; padding-bottom: 10px; }
+        
+        .filtres { display: flex; gap: 15px; background: #e9ecef; padding: 15px; border-radius: 5px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .filtres label { font-weight: bold; font-size: 14px; color: #555; }
+        .filtres input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-recherche { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-recherche:hover { background: #218838; }
+
+        .resultats { margin-top: 20px; }
+        .note-card { background: #fff; border-left: 5px solid #007BFF; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .note-header { display: flex; justify-content: space-between; color: #666; font-size: 12px; margin-bottom: 10px; }
+        .hashtag { color: #007BFF; font-weight: bold; }
+        
+        #chargement { display: none; color: #007BFF; font-weight: bold; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Recherche Avancee (Hashtag + Dates)</h2>
+        
+        <div class="filtres">
+            <div>
+                <label>Hashtag :</label><br>
+                <input type="text" id="inputHashtag" value="#schema" placeholder="ex: #schema">
+            </div>
+            <div>
+                <label>Du :</label><br>
+                <input type="date" id="dateDebut" value="2026-03-01">
+            </div>
+            <div>
+                <label>Au :</label><br>
+                <input type="date" id="dateFin" value="2026-04-30">
+            </div>
+            <div style="margin-top: 18px;">
+                <button class="btn-recherche" id="btnSearch">Lancer la recherche SQL</button>
+            </div>
+        </div>
+
+        <div id="chargement">Execution de la requete (INNER JOIN + BETWEEN)...</div>
+
+        <div class="resultats" id="zoneResultats">
+            <p style="color: #777;"><i>Selectionnez une plage de dates et un hashtag pour voir les resultats.</i></p>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('btnSearch').addEventListener('click', async () => {
+        let hashtag = document.getElementById('inputHashtag').value.trim();
+        const dateDebut = document.getElementById('dateDebut').value;
+        const dateFin = document.getElementById('dateFin').value;
+        const zoneResultats = document.getElementById('zoneResultats');
+        const chargement = document.getElementById('chargement');
+
+        if (!hashtag.startsWith('#') && hashtag !== '') {
+            hashtag = '#' + hashtag;
+        }
+
+        chargement.style.display = 'block';
+        zoneResultats.innerHTML = '';
+
+        try {
+            // ICI C'EST CORRIGE : LE PORT EST 3002
+            const url = `http://localhost:3002/api/search-dates?tag=${encodeURIComponent(hashtag)}&start=${dateDebut}&end=${dateFin}`;
+            
+            const response = await fetch(url);
+            const resultats = await response.json();
+
+            chargement.style.display = 'none';
+
+            if (resultats.length === 0 || resultats.erreur) {
+                zoneResultats.innerHTML = '<p style="color: red;">Aucune note trouvee pour cette periode dans la base de donnees.</p>';
+            } else {
+                resultats.forEach(note => {
+                    const datePropre = new Date(note.created_at).toLocaleString('fr-FR');
+                    
+                    let baliseImage = '';
+                    if (note.image_data) {
+                        baliseImage = `<br><img src="${note.image_data}" alt="Capture du tableau" style="max-width: 100%; border-radius: 5px; margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">`;
+                    }
+                    
+                    zoneResultats.innerHTML += `
+                        <div class="note-card">
+                            <div class="note-header">
+                                <span>Cree le : <b>${datePropre}</b></span>
+                                <span class="hashtag">${hashtag}</span>
+                            </div>
+                            <div>${note.contenu}</div>
+                            ${baliseImage}
+                        </div>
+                    `;
+                });
+            }
+        } catch (erreur) {
+            chargement.style.display = 'none';
+            console.error("Erreur :", erreur);
+            zoneResultats.innerHTML = '<p style="color: red;">Erreur de connexion au serveur PostgreSQL.</p>';
+        }
+    });
+    </script>
+</body>
+</html>

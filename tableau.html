@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Prototype : Capture du Tableau</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; gap: 40px; padding: 20px; }
+        
+        /* Zone du prof */
+        .prof-section { border-right: 2px dashed #ccc; padding-right: 40px; }
+        canvas { border: 2px solid #333; cursor: crosshair; background-color: #f8f9fa; }
+        button { margin-top: 10px; padding: 10px 15px; background: #007BFF; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        button:hover { background: #0056b3; }
+
+        /* Zone de l'étudiant  */
+        .student-section { flex: 1; }
+        .editeur-notes { border: 1px solid #aaa; padding: 15px; min-height: 300px; background: #fff; border-radius: 5px; }
+        
+        .thumbnail {
+            max-width: 150px; 
+            margin: 10px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: zoom-in; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .thumbnail:hover { border-color: #007BFF; transform: scale(1.05); }
+
+        /* L'image en grand (Lightbox / Modale) */
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000;
+        }
+        .img-en-grand { max-width: 90vw; max-height: 90vh; border: 5px solid white; border-radius: 8px; box-shadow: 0 0 20px black; }
+    </style>
+</head>
+<body>
+
+    <div class="prof-section">
+        <h2>Tableau du professeur</h2>
+        <p><i>(Un schema est genere pour le test)</i></p>
+        <canvas id="monCanvas" width="400" height="300"></canvas>
+        <br>
+        <button id="btnCapture">Capturer pour mes notes</button>
+    </div>
+
+    <div class="student-section">
+        <h2>Mes Notes (Etudiant)</h2>
+        <div class="editeur-notes" id="zoneDeNotes">
+            <p>Le prof vient d'expliquer ce concept tres important :</p>
+        </div>
+    </div>
+
+    <div class="overlay" id="modale">
+        <img id="imageEnGrand" class="img-en-grand" src="">
+    </div>
+
+    <script>
+        // --- 1. DESSINER UN FAUX COURS SUR LE CANVAS ---
+        const canvas = document.getElementById('monCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "black";
+        ctx.font = "20px Arial";
+        ctx.fillText("Schema Base de Donnees", 80, 50);
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(100, 100, 80, 80); 
+        ctx.strokeRect(220, 100, 80, 80); 
+        ctx.beginPath(); 
+        ctx.moveTo(180, 140); ctx.lineTo(220, 140);
+        ctx.stroke();
+
+        // --- 2. LA CAPTURE AVEC ANTI-SPAM ET SAUVEGARDE BDD ---
+        const btnCapture = document.getElementById('btnCapture');
+
+        btnCapture.addEventListener('click', async () => {
+            
+            btnCapture.disabled = true;
+            const texteOriginal = btnCapture.innerText;
+            btnCapture.innerText = "Sauvegarde en cours...";
+            btnCapture.style.opacity = "0.7";
+
+            try {
+                const imageCompressee = canvas.toDataURL('image/jpeg', 0.6);
+
+                const vignette = document.createElement('img');
+                vignette.src = imageCompressee;
+                vignette.className = 'thumbnail'; 
+                vignette.title = "Cliquez pour agrandir";
+
+                vignette.addEventListener('click', () => {
+                    document.getElementById('imageEnGrand').src = imageCompressee;
+                    document.getElementById('modale').style.display = 'flex';
+                });
+
+                document.getElementById('zoneDeNotes').appendChild(vignette);
+
+                const response = await fetch('http://localhost:3002/api/notes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: 1,
+                        contenu: "Le prof a dessine un #schema au tableau.",
+                        timecode: "12:30",
+                        image_data: imageCompressee
+                    })
+                });
+
+                const data = await response.json();
+                console.log("Succes :", data);
+
+            } catch (erreur) {
+                console.error("Erreur de capture ou d'envoi :", erreur);
+                alert("Un probleme est survenu lors de la sauvegarde.");
+            } finally {
+                setTimeout(() => {
+                    btnCapture.disabled = false;
+                    btnCapture.innerText = texteOriginal;
+                    btnCapture.style.opacity = "1";
+                }, 1500);
+            }
+        });
+
+        document.getElementById('modale').addEventListener('click', () => {
+            document.getElementById('modale').style.display = 'none';
+        });
+    </script>
+
+</body>
+</html>
