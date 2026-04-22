@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://localhost:3004/socket.io/socket.io.js"></script>
+    <title>Test</title>
+    <style>
+        /* Style du bouton d'ouverture */
+        #btn-afficher {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px;
+        }
+
+        /* Arrière-plan sombre (overlay) */
+        #overlay-modale {
+            display: none; /* Caché par défaut */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8); /* Fond noir semi-transparent */
+            z-index: 1000; /* Assure que la modale est au-dessus de tout le reste */
+            
+            /* Flexbox pour centrer le lecteur parfaitement au milieu */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Conteneur du lecteur */
+        #conteneur-lecteur {
+            position: relative;
+            /* Le lecteur YouTube va se charger à l'intérieur de cette zone */
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Synchro</h1>
+    
+    <button id="btn-afficher">Voir la photo</button>
+
+    <div id="overlay-modale">
+        <div id="conteneur-lecteur">
+            <div id="player"></div>
+        </div>
+    </div>
+
+</body>
+<script type="module">
+    import {Vignette} from "../assets/js/model/Vignette.js";
+    import {Video} from "../assets/js/model/Video.js";
+    import {PlayerState} from "../assets/js/model/PlayerState.js";
+
+    // Initialisation de ton lecteur (inchangé)
+    let video = new Video("M7lc1UVf-VE");
+    let playerState = new PlayerState("M7lc1UVf-VE", "paused", 120);
+    window.player = new Vignette(video, playerState);
+    
+    // --- Logique d'affichage ---
+    const btnAfficher = document.getElementById('btn-afficher');
+    const overlayModale = document.getElementById('overlay-modale');
+
+    // 1. Quand on clique sur le bouton, on affiche l'overlay (display: flex permet de garder le centrage)
+    btnAfficher.addEventListener('click', () => {
+        overlayModale.style.display = 'flex';
+    });
+
+    // 2. Quand on clique n'importe où sur l'overlay, on le cache
+    overlayModale.addEventListener('click', (evenement) => {
+        // La condition if s'assure qu'on clique bien sur le fond sombre (overlay) 
+        // et non sur le lecteur vidéo lui-même.
+        if (evenement.target === overlayModale) {
+            overlayModale.style.display = 'none';
+        }
+    });
+</script>
+</html>

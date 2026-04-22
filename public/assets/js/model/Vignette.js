@@ -27,7 +27,7 @@ export class Vignette extends VideoPlayer {
         console.log(this.currentState);
         super.setState(this.currentState);
         //this.pause();
-        this.interval = setInterval(() => this.pause(),1000);
+        this.interval = setInterval(() => this.pause(),500);
     }
 
     static getVignette(text){

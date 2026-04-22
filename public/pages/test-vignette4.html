@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://localhost:3004/socket.io/socket.io.js"></script>
+    <title>Test Synchro et Liens</title>
+    <style>
+        /* Arrière-plan sombre (overlay) */
+        #overlay-modale {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #conteneur-lecteur {
+            position: relative;
+        }
+
+        /* Style esthétique pour les liens générés */
+        .lien-vignette {
+            color: blue;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Synchro</h1>
+    
+    <div id="contenu-texte"></div>
+
+    <div id="overlay-modale">
+        <div id="conteneur-lecteur">
+            <div id="player"></div>
+        </div>
+    </div>
+
+    <script type="module">
+    import {Vignette} from "../assets/js/model/Vignette.js";
+    import {Video} from "../assets/js/model/Video.js";
+    import {PlayerState} from "../assets/js/model/PlayerState.js";
+
+    let videoParDefaut = new Video("M7lc1UVf-VE");
+    let etatParDefaut = new PlayerState("M7lc1UVf-VE", "paused", 0);
+    window.player = new Vignette(videoParDefaut, etatParDefaut);
+
+    // 2. Génération du texte et des liens
+    let text = "test 1 2 3 [|M7lc1UVf-VE:120] test 4 5 6 [|M7lc1UVf-VE:90]";
+    window.vignettes = Vignette.getVignette(text);
+
+    let i = 0;
+    for (let vignette of window.vignettes){
+        let replace = "[|" + vignette[0] + ":" + vignette[1] + "]";
+        text = text.replace(replace, '<a class="lien-vignette" onclick="window.ouvrirLecteur(' + i + ')">' + replace + '</a>');
+        i++;
+    }
+
+    document.getElementById("contenu-texte").innerHTML = "<p>" + text + "</p>";
+
+    const overlayModale = document.getElementById('overlay-modale');
+
+    window.ouvrirLecteur = function(id) {
+        const donnees = window.vignettes[id];
+        const videoId = donnees[0];
+        const temps = parseInt(donnees[1]);
+
+        let nouvelEtat = new PlayerState(videoId, "paused", temps);
+        
+        window.player.setState(nouvelEtat);
+
+        overlayModale.style.display = 'flex';
+    };
+
+    overlayModale.addEventListener('click', (evenement) => {
+        if (evenement.target === overlayModale) {
+            overlayModale.style.display = 'none';
+        }
+    });
+</script>
+</body>
+</html>
