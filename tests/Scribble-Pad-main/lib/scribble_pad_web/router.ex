@@ -7,7 +7,7 @@ defmodule ScribblePadWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, html: {ScribblePadWeb.Layouts, :root}
     plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    # plug :put_secure_browser_headers # Désactivé pour permettre l'utilisation via iframe (CORS / X-Frame-Options)
   end
 
   pipeline :api do

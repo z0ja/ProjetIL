@@ -35,6 +35,11 @@ window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 
+// Empêcher LiveView de rafraîchir la page en boucle si la connexion échoue dans l'iframe
+liveSocket.reloadWithJitter = function() {
+    console.warn("LiveView a tenté de rafraîchir la page suite à une perte de connexion, mais le rechargement a été bloqué pour le test dans l'iframe.");
+};
+
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session

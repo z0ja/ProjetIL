@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Complexité</title>
+    <style>
+        #board {
+            border: 1px solid black;
+            cursor: crosshair;
+            margin-top: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #status {
+            font-weight: bold;
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Test Détection de Complexité</h1>
+
+        <div id="player"></div>
+        <div id="status">Vitesse : 1.0x</div>
+
+        <iframe id="board" src="http://localhost:4000/pad/test" width="800" height="600" frameborder="0"></iframe>
+    </div>
+
+    <script type="module">
+        import { VideoPlayer } from "../assets/js/model/VideoPlayer.js";
+        import { Video } from "../assets/js/model/Video.js";
+
+        // Initialisation du joueur (mock user/room pour éviter les erreurs de VideoPlayer)
+        if (!localStorage.getItem("user")) {
+            localStorage.setItem("user", JSON.stringify({ id: "testUser" }));
+        }
+        if (!localStorage.getItem("roomObject")) {
+            localStorage.setItem("roomObject", JSON.stringify({ id: "testRoom", admin: ["testUser"] }));
+        }
+
+        let video = new Video("M7lc1UVf-VE", "test", "test");
+        window.player = new VideoPlayer(video);
+
+        // --- Logique du Tableau (via iframe vers Scribble-Pad) et Détection de Complexité ---
+        const statusDiv = document.getElementById("status");
+
+        let drawEvents = [];
+        let inactivityTimeout;
+
+        function updatePlaybackRate(isNewStroke = true) {
+            const now = Date.now();
+
+            // Conserver uniquement les événements des 10 dernières secondes
+            drawEvents = drawEvents.filter(time => now - time <= 10000);
+
+            // Si plus de 5 événements en 10 secondes -> Schéma complexe (réduit pour faciliter les tests)
+            if (drawEvents.length > 5) {
+                if (window.player && window.player.player && typeof window.player.player.setPlaybackRate === 'function') {
+                    window.player.player.setPlaybackRate(0.5);
+                    statusDiv.innerText = "Vitesse : 0.5x (Schéma complexe détecté)";
+                    statusDiv.style.color = "red";
+                    console.log("Schéma complexe détecté : vitesse réduite à 0.5x");
+                }
+            }
+
+            // Réinitialiser le timeout d'inactivité
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(() => {
+                if (window.player && window.player.player && typeof window.player.player.setPlaybackRate === 'function') {
+                    window.player.player.setPlaybackRate(1.0);
+                    statusDiv.innerText = "Vitesse : 1.0x";
+                    statusDiv.style.color = "green";
+                    console.log("Inactivité détectée : vitesse rétablie à 1.0x");
+                }
+                drawEvents = []; // On réinitialise l'historique après l'inactivité
+            }, 15000); // Retour à 1.0x après 15 secondes d'inactivité
+        }
+
+        // Écouter les événements envoyés par l'iframe du tableau Scribble-Pad
+        window.addEventListener("message", (event) => {
+            if (event.data === 'draw_event') {
+                // On considère un trait/clic dans l'iframe comme un événement de dessin
+                drawEvents.push(Date.now());
+                updatePlaybackRate();
+            } else if (event.data === 'draw_active') {
+                // L'utilisateur vient de relâcher la souris (fin d'un long trait)
+                // Ça ne compte pas comme un "nouveau" trait pour la complexité,
+                // mais ça doit remettre à zéro le chrono de 15 secondes d'inactivité.
+                updatePlaybackRate(false);
+            }
+        });
+    </script>
+</body>
+
+</html>

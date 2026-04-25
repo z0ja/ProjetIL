@@ -29,6 +29,9 @@
   function startDrawing(event) {
     isDrawing = true;
     currentPath = `M${getCoordinates(event).x},${getCoordinates(event).y}`;
+    if (window.parent) {
+      window.parent.postMessage('draw_event', '*');
+    }
   }
 
   function draw(event) {
@@ -46,6 +49,10 @@
       submitLine(currentPath, currentColor);
     }
     currentPath = "";
+    if (window.parent) {
+      // Signale que l'utilisateur était actif jusqu'à ce moment précis
+      window.parent.postMessage('draw_active', '*');
+    }
   }
 
   function changeColor(color) {
