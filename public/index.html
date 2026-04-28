@@ -1,90 +1,345 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <link href="../assets/css/styles.css" rel="stylesheet" crossorigin="anonymous">
-    <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap" rel="stylesheet">
-    
-    <title>W2G</title>
+    <link href="assets/css/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>W2G — Watch Together</title>
+    <style>
+        :root {
+            --bg:       #f4f5f7;
+            --surface:  #ffffff;
+            --surface2: #f0f2f5;
+            --border:   #e2e5eb;
+            --border2:  #cdd2da;
+            --navy:     #0f1f3d;
+            --navy2:    #1a3260;
+            --accent:   #2563eb;
+            --accent2:  #0ea5e9;
+            --accent3:  #10b981;
+            --text:     #0f1f3d;
+            --muted:    #64748b;
+            --mono:     'DM Mono', monospace;
+            --display:  'Syne', sans-serif;
+            --shadow:   0 1px 3px rgba(15,31,61,.08), 0 4px 16px rgba(15,31,61,.06);
+            --shadow-lg: 0 4px 24px rgba(15,31,61,.12);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--text); font-family: var(--display); min-height: 100vh; overflow-x: hidden; }
+
+        /* ── NAV ── */
+        .nav-bar {
+            position: sticky; top: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 48px; height: 62px;
+            background: rgba(255,255,255,.92);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+        }
+        .nav-logo { font-family: var(--mono); font-size: 1.05rem; letter-spacing: .1em; color: var(--navy); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+        .nav-links a { color: var(--muted); text-decoration: none; font-size: .84rem; padding: 7px 14px; border-radius: 6px; transition: background .15s, color .15s; }
+        .nav-links a:hover { background: var(--surface2); color: var(--text); }
+        .btn-nav { background: var(--navy) !important; color: #fff !important; font-weight: 700 !important; font-size: .8rem !important; letter-spacing: .06em; text-transform: uppercase; border-radius: 6px !important; }
+        .btn-nav:hover { background: var(--navy2) !important; color: #fff !important; }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            min-height: calc(100vh - 62px);
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 100px 48px 80px;
+            overflow: hidden;
+        }
+        /* Subtle dot grid background */
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(circle, var(--border2) 1px, transparent 1px);
+            background-size: 28px 28px;
+            opacity: .5;
+            pointer-events: none;
+        }
+        /* Top-right accent shape */
+        .hero-shape {
+            position: absolute;
+            top: -120px; right: -120px;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(37,99,235,.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-eyebrow {
+            font-family: var(--mono);
+            font-size: .7rem; color: var(--accent);
+            letter-spacing: .18em; text-transform: uppercase;
+            margin-bottom: 28px;
+            display: flex; align-items: center; gap: 10px;
+            position: relative; z-index: 1;
+            animation: fadeUp .5s ease both;
+        }
+        .hero-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--accent); display: block; }
+        .hero-title {
+            font-size: clamp(3.5rem, 8vw, 6.5rem);
+            font-weight: 800; line-height: .95; letter-spacing: -.04em;
+            max-width: 780px;
+            position: relative; z-index: 1;
+            animation: fadeUp .5s .08s ease both;
+        }
+        .hero-title em { font-style: normal; color: var(--accent); display: block; }
+        .hero-desc {
+            font-family: var(--mono); font-size: .92rem; color: var(--muted);
+            margin-top: 32px; max-width: 460px; line-height: 1.75;
+            position: relative; z-index: 1;
+            animation: fadeUp .5s .16s ease both;
+        }
+        .hero-cta {
+            display: flex; gap: 12px; margin-top: 48px; flex-wrap: wrap;
+            position: relative; z-index: 1;
+            animation: fadeUp .5s .24s ease both;
+        }
+        .btn-primary {
+            background: var(--navy); color: #fff;
+            padding: 15px 36px; border-radius: 8px;
+            font-weight: 700; font-size: .88rem; letter-spacing: .04em;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 9px;
+            transition: background .18s, transform .18s;
+            box-shadow: 0 2px 12px rgba(15,31,61,.25);
+        }
+        .btn-primary:hover { background: var(--navy2); transform: translateY(-2px); color: #fff; }
+        .btn-ghost {
+            background: var(--surface); color: var(--text);
+            padding: 15px 36px; border-radius: 8px;
+            border: 1px solid var(--border2);
+            font-weight: 600; font-size: .88rem;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 9px;
+            transition: border-color .18s, transform .18s;
+        }
+        .btn-ghost:hover { border-color: var(--border2); transform: translateY(-2px); color: var(--text); box-shadow: var(--shadow); }
+
+        /* ── STATS ── */
+        .stats-bar {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 28px 48px;
+            background: var(--surface);
+            display: flex; gap: 56px; flex-wrap: wrap;
+        }
+        .stat-item { display: flex; flex-direction: column; gap: 4px; }
+        .stat-num { font-family: var(--mono); font-size: 2rem; font-weight: 500; color: var(--navy); letter-spacing: -.02em; }
+        .stat-label { font-size: .72rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+
+        /* ── FEATURES ── */
+        .features { padding: 96px 48px; }
+        .section-label { font-family: var(--mono); font-size: .7rem; color: var(--accent); letter-spacing: .16em; text-transform: uppercase; margin-bottom: 14px; }
+        .section-title { font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 800; letter-spacing: -.03em; margin-bottom: 56px; color: var(--navy); }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 36px 32px;
+            position: relative; overflow: hidden;
+            transition: box-shadow .2s, transform .2s, border-color .2s;
+        }
+        .feature-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); border-color: var(--border2); }
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            opacity: 0; transition: opacity .2s;
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon { font-size: 1.5rem; color: var(--accent); margin-bottom: 18px; display: block; }
+        .feature-title { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+        .feature-desc { font-family: var(--mono); font-size: .78rem; color: var(--muted); line-height: 1.7; }
+        .feature-badge {
+            display: inline-block; margin-top: 14px;
+            font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase;
+            color: var(--accent); border: 1px solid rgba(37,99,235,.3);
+            background: rgba(37,99,235,.06);
+            padding: 3px 8px; border-radius: 4px;
+        }
+
+        /* ── HOW IT WORKS ── */
+        .how-it-works { padding: 96px 48px; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .step { padding: 40px 32px; border-right: 1px solid var(--border); background: var(--surface); position: relative; }
+        .step:last-child { border-right: none; }
+        .step-num { font-family: var(--mono); font-size: 2.8rem; font-weight: 300; color: var(--border2); line-height: 1; margin-bottom: 20px; }
+        .step-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 8px; }
+        .step-desc { font-family: var(--mono); font-size: .76rem; color: var(--muted); line-height: 1.65; }
+
+        /* ── CTA ── */
+        .cta-section {
+            padding: 96px 48px;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+        .cta-tag {
+            display: inline-block;
+            background: rgba(37,99,235,.08); color: var(--accent);
+            font-family: var(--mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
+            padding: 6px 14px; border-radius: 100px; border: 1px solid rgba(37,99,235,.2);
+            margin-bottom: 24px;
+        }
+        .cta-title { font-size: clamp(2.2rem, 4vw, 3.5rem); font-weight: 800; letter-spacing: -.03em; color: var(--navy); margin-bottom: 16px; }
+        .cta-sub { font-family: var(--mono); color: var(--muted); font-size: .88rem; margin-bottom: 40px; }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 28px 48px;
+            background: var(--surface);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer p { font-family: var(--mono); font-size: .72rem; color: var(--muted); }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .nav-bar, .hero, .stats-bar, .features, .how-it-works, .cta-section, footer { padding-left: 20px; padding-right: 20px; }
+            .step { border-right: none; border-bottom: 1px solid var(--border); }
+            .step:last-child { border-bottom: none; }
+            footer { flex-direction: column; gap: 8px; text-align: center; }
+        }
+    </style>
 </head>
-<body class="mx-5 mx-md-4">
-    
-    <nav class="navbar container">
-        <a class="navbar-brand" href="#">W2G</a>
-        <div class="">
-            <ul class="navbar-nav d-flex flex-row gap-3 align-items-center" id="nav-auth">
-                
-            </ul>
-        </div>
-    </nav>
-    <section class="container justify-content-center">
-        <h1 class="text-center ">
-            Bienvenue sur W2G
-        </h1>
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <p class="text-center fs-4 mt-3">
-            Regardez des vidéos en synchronisation avec vos amis, où que vous soyez.
-        </p>
-            </div>
-        </div>
-    </section>
+<body>
 
-    <section class="container">
-        <div class="d-flex flex-column align-items-center">
-            <a href="pages/room-make.html" class="btn btn-primary btn-lg mb-3">Créer une room</a>
-            <a href="pages/room-join.html" class="btn btn-secondary btn-lg">Rejoindre une room</a>
+<!-- NAV -->
+<nav class="nav-bar">
+    <a class="nav-logo" href="#"><div class="nav-logo-dot"></div>W2G</a>
+    <div class="nav-links" id="nav-auth">
+        <a href="pages/login.html">Connexion</a>
+        <a href="pages/register.html" class="btn-nav">S'inscrire</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-shape"></div>
+    <div class="hero-eyebrow">Plateforme collaborative — v2.0</div>
+    <h1 class="hero-title">
+        Regardez.
+        <em>Ensemble.</em>
+    </h1>
+    <p class="hero-desc">
+        Synchronisez votre visionnage avec vos amis en temps réel.
+        Tableau blanc collaboratif, chat et prise de notes intégrés.
+    </p>
+    <div class="hero-cta">
+        <a href="pages/room-make.html" class="btn-primary">
+            <i class="bi bi-plus-lg"></i> Créer une room
+        </a>
+        <a href="pages/room-join.html" class="btn-ghost">
+            <i class="bi bi-arrow-right"></i> Rejoindre
+        </a>
+    </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+    <div class="stat-item"><span class="stat-num">∞</span><span class="stat-label">Rooms simultanées</span></div>
+    <div class="stat-item"><span class="stat-num">4</span><span class="stat-label">Nouvelles fonctionnalités</span></div>
+    <div class="stat-item"><span class="stat-num">0 ms</span><span class="stat-label">Latence cible</span></div>
+    <div class="stat-item"><span class="stat-num">100%</span><span class="stat-label">Open & collaboratif</span></div>
+</div>
+
+<!-- FEATURES -->
+<section class="features">
+    <div class="section-label">// ce qu'on offre</div>
+    <h2 class="section-title">Tout pour apprendre ensemble.</h2>
+    <div class="features-grid">
+
+        <div class="feature-card">
+            <i class="bi bi-chat-dots-fill feature-icon"></i>
+            <div class="feature-title">Chat en temps réel</div>
+            <div class="feature-desc">Communiquez instantanément avec votre groupe via Socket.IO pendant le visionnage.</div>
         </div>
-    </section>
 
-    <section class="container">
-        <div class="mt-5">
-            <h2 class="text-center mb-4">Fonctionnalités</h2>
-            <div class="row">
-                <div class="col-md-4 text-center mb-4">
-                    <i class="bi bi-chat-dots-fill display-4 mb-3"></i>
-                    <h4>Chat en temps réel</h4>
-                    <p>Communiquez avec vos amis pendant que vous regardez des vidéos ensemble.</p>
-                </div>
-                <div class="col-md-4 text-center mb-4">
-                    <i class="bi bi-film display-4 mb-3"></i>
-                    <h4>Bibliothèque de vidéos</h4>
-                    <p>
-                        Accédez à une vaste sélection de vidéos à regarder en groupe.</br>
-                        Sélectionnez une vidéo de notre bibliothèque ou partagez un lien.
-                    </p>
-                </div>
-                <div class="col-md-4 text-center mb-4">
-                    <i class="bi bi-person-plus-fill display-4 mb-3"></i>
-                    <h4>Créez ou rejoignez une room</h4>
-                    <p>Invitez vos amis à rejoindre votre room privée.</p>
-                </div>
-            </div>
+        <div class="feature-card">
+            <i class="bi bi-easel2 feature-icon"></i>
+            <div class="feature-title">Tableau blanc — Scribble-Pad</div>
+            <div class="feature-desc">Tableau collaboratif temps réel via Phoenix PubSub. Traits synchronisés entre tous les participants.</div>
+            <span class="feature-badge">✦ nouveau</span>
         </div>
-    </section>
 
-    <footer class="container">
-        <div>
-            <hr>
-
+        <div class="feature-card">
+            <i class="bi bi-clock-history feature-icon"></i>
+            <div class="feature-title">Marquage de timecode</div>
+            <div class="feature-desc">Épinglez un instant précis de la vidéo dans vos notes. Un clic pour y revenir directement sur YouTube.</div>
+            <span class="feature-badge">✦ nouveau</span>
         </div>
-        <div class="container text-center py-4">
-            <p>&copy; 2024 W2G. Tous droits réservés.</p>
+
+        <div class="feature-card">
+            <i class="bi bi-speedometer2 feature-icon"></i>
+            <div class="feature-title">Vitesse adaptative</div>
+            <div class="feature-desc">La lecture ralentit automatiquement lors des passages denses au tableau. Retour à 1× après 15 s d'inactivité.</div>
+            <span class="feature-badge">✦ nouveau</span>
         </div>
-    </footer>
-    
 
+        <div class="feature-card">
+            <i class="bi bi-funnel-fill feature-icon"></i>
+            <div class="feature-title">Filtres avancés</div>
+            <div class="feature-desc">Retrouvez vos notes par hashtag et plage de dates grâce à l'indexation MySQL optimisée.</div>
+            <span class="feature-badge">✦ nouveau</span>
+        </div>
 
-    <!-- JS Files -->
-    <script src="js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="../assets/js/jquery.min.js"></script>
-    <script src="../assets/js/jquery.sticky.js"></script>
-    
-    <script src="../assets/js/auth-nav.js"></script>
+        <div class="feature-card">
+            <i class="bi bi-collection-play-fill feature-icon"></i>
+            <div class="feature-title">Playlist partagée</div>
+            <div class="feature-desc">Ajoutez, réorganisez et synchronisez une playlist YouTube commune pour toute la room.</div>
+        </div>
+
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+    <div class="section-label">// comment ça marche</div>
+    <h2 class="section-title">En 3 étapes.</h2>
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-title">Créez ou rejoignez</div>
+            <div class="step-desc">Ouvrez une room privée et partagez le lien à vos amis ou collègues.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-title">Synchronisez</div>
+            <div class="step-desc">Play, pause, seek — tout le monde est au même endroit de la vidéo, en temps réel.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-title">Collaborez</div>
+            <div class="step-desc">Annotez le tableau Scribble-Pad, prenez des notes avec timecodes, discutez via le chat.</div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="cta-tag">Prêt à commencer ?</div>
+    <h2 class="cta-title">Aucune installation requise.</h2>
+    <p class="cta-sub">Créez une room en quelques secondes et invitez vos amis.</p>
+    <div class="hero-cta" style="justify-content:center">
+        <a href="pages/room-make.html" class="btn-primary"><i class="bi bi-plus-lg"></i> Créer une room</a>
+        <a href="pages/register.html" class="btn-ghost">Créer un compte</a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2024 W2G — Watch Together.</p>
+    <p>Projet IL · Méthode Spirale</p>
+</footer>
+
+<script src="assets/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="assets/js/auth-nav.js"></script>
 </body>
 </html>
