@@ -1,445 +1,985 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <link href="../assets/css/styles.css" rel="stylesheet" crossorigin="anonymous">
     <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title id="titre">Room — W2G</title>
     <style>
-        body { background-color: #fcfcfc; }
-        
-        .navbar { margin-bottom: 20px; border-bottom: 1px solid #eee; }
-        
-        /* Zone Vidéo */
-        #video-container {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background-color: #000;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            overflow: hidden;
-            position: relative;
+        :root {
+            --bg:       #f4f5f7;
+            --surface:  #ffffff;
+            --surface2: #f0f2f5;
+            --border:   #e2e5eb;
+            --border2:  #cdd2da;
+            --navy:     #0f1f3d;
+            --navy2:    #1a3260;
+            --accent:   #2563eb;
+            --accent2:  #0ea5e9;
+            --accent3:  #f59e0b;
+            --success:  #10b981;
+            --danger:   #ef4444;
+            --text:     #0f1f3d;
+            --muted:    #64748b;
+            --mono:     'DM Mono', monospace;
+            --display:  'Syne', sans-serif;
+            --shadow:   0 1px 3px rgba(15,31,61,.07), 0 4px 12px rgba(15,31,61,.05);
         }
-        
-        #video-iframe { width: 100%; height: 100%; border: none; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: var(--display); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Contrôles */
-        .controls-area {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            justify-content: center; /* Centrer les boutons */
-            margin-bottom: 20px;
+        /* ── NAV ── */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; height: 54px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0; z-index: 50;
+        }
+        .nav-left  { display: flex; align-items: center; gap: 16px; }
+        .nav-right { display: flex; align-items: center; gap: 10px; }
+        .nav-logo { font-family: var(--mono); font-size: .98rem; letter-spacing: .08em; color: var(--navy); text-decoration: none; display: flex; align-items: center; gap: 7px; }
+        .nav-logo-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+        .room-badge {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 6px; padding: 4px 12px;
+            font-family: var(--mono); font-size: .68rem; color: var(--muted);
+            display: flex; align-items: center; gap: 7px;
+        }
+        .room-badge .live-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        .speed-pill {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 6px; padding: 4px 10px;
+            font-family: var(--mono); font-size: .68rem; color: var(--muted);
+            display: flex; align-items: center; gap: 5px;
+        }
+        .speed-pill .speed-val { color: var(--navy); font-weight: 500; }
+
+        .btn-icon {
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--muted); width: 32px; height: 32px;
+            border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: .88rem; transition: all .15s; text-decoration: none;
+        }
+        .btn-icon:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+        /* ── APP BODY ── */
+        .app-body {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            overflow: hidden;
         }
 
-        /* Playlist */
-        .playlist-card {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
+        /* ── CENTER PANE ── */
+        .center-pane {
+            display: flex; flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden; background: var(--bg);
+        }
+
+        /* ── MAIN SPLIT : Lecteur | Scribble-Pad ── */
+        .main-split {
+            display: grid; grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid var(--border);
+            height: 54%; flex-shrink: 0;
+        }
+
+        /* ── LABEL PANNEAU ── */
+        .pane-label {
+            font-family: var(--mono); font-size: .64rem;
+            letter-spacing: .12em; text-transform: uppercase;
+            color: var(--muted); display: flex; align-items: center; gap: 7px;
+        }
+        .pane-label::before {
+            content: ''; width: 5px; height: 5px;
+            border-radius: 50%; background: var(--accent);
+        }
+
+        /* ── LECTEUR VIDÉO ── */
+        .player-wrap { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .player-header {
+            padding: 9px 14px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--surface); flex-shrink: 0;
+        }
+        .player-container { flex: 1; background: #000; min-height: 0; position: relative; }
+        #player { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+        .player-controls {
+            padding: 9px 14px; border-top: 1px solid var(--border);
+            background: var(--surface); display: flex; align-items: center; gap: 7px;
+            flex-shrink: 0; flex-wrap: wrap;
+        }
+        .ctrl-btn {
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); padding: 6px 11px; border-radius: 6px;
+            font-family: var(--mono); font-size: .7rem; cursor: pointer;
+            display: flex; align-items: center; gap: 5px;
+            transition: all .15s; white-space: nowrap;
+        }
+        .ctrl-btn:hover { border-color: var(--border2); background: var(--surface2); }
+        .ctrl-btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); font-weight: 700; }
+        .ctrl-btn.primary:hover { background: var(--navy2); }
+        .ctrl-speed { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+        .ctrl-speed label { font-family: var(--mono); font-size: .62rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+        .ctrl-speed select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 5px 7px; border-radius: 6px; font-family: var(--mono); font-size: .7rem; cursor: pointer; }
+
+        /* ── SCRIBBLE-PAD ── */
+        .board-wrap { display: flex; flex-direction: column; background: var(--surface); }
+        .board-header {
+            padding: 9px 14px; border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+        }
+        .board-header-right { display: flex; align-items: center; gap: 7px; }
+        .board-pad-input {
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); padding: 4px 9px; border-radius: 5px;
+            font-family: var(--mono); font-size: .66rem; outline: none;
+            width: 110px; transition: border-color .15s;
+        }
+        .board-pad-input:focus { border-color: var(--accent); }
+        .board-pad-input::placeholder { color: var(--border2); }
+        .board-nav-btn {
+            background: var(--navy); border: none; color: #fff;
+            padding: 5px 10px; border-radius: 5px;
+            font-family: var(--mono); font-size: .66rem; font-weight: 700;
+            cursor: pointer; transition: background .15s;
+        }
+        .board-nav-btn:hover { background: var(--navy2); }
+
+        /* iframe Scribble-Pad */
+        .board-iframe-wrap { flex: 1; position: relative; min-height: 0; overflow: hidden; }
+        #scribblePadIframe { width: 100%; height: 100%; border: none; display: block; }
+
+        /* Overlay si Scribble-Pad hors ligne */
+        .board-offline {
+            position: absolute; inset: 0;
+            background: var(--bg);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+            z-index: 5;
+        }
+        .board-offline.hidden { display: none; }
+        .board-offline-icon { font-size: 2.2rem; color: var(--border2); }
+        .board-offline p {
+            font-family: var(--mono); font-size: .74rem; color: var(--muted);
+            text-align: center; max-width: 230px; line-height: 1.65;
+        }
+        .board-offline code {
+            font-family: var(--mono); font-size: .7rem;
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 2px 6px; border-radius: 4px; color: var(--accent);
+        }
+
+        .board-footer {
+            padding: 7px 14px; border-top: 1px solid var(--border);
+            background: var(--surface);
+            display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+        }
+        .capture-btn {
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); padding: 5px 12px; border-radius: 6px;
+            font-family: var(--mono); font-size: .68rem; cursor: pointer;
+            display: flex; align-items: center; gap: 5px; transition: all .15s;
+        }
+        .capture-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(37,99,235,.04); }
+        .capture-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+        /* Badges d'état */
+        .activity-badge {
+            display: none; font-family: var(--mono); font-size: .62rem; letter-spacing: .08em;
+            padding: 3px 8px; border-radius: 4px;
+            background: rgba(14,165,233,.08); border: 1px solid rgba(14,165,233,.25); color: var(--accent2);
+            align-items: center; gap: 4px;
+            animation: blink .8s ease-in-out infinite;
+        }
+        .activity-badge.visible { display: inline-flex; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+        .complexity-badge {
+            font-family: var(--mono); font-size: .62rem; letter-spacing: .08em;
+            padding: 3px 8px; border-radius: 4px; display: none; align-items: center; gap: 4px;
+        }
+        .complexity-badge.slow   { display: inline-flex; background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); color: var(--accent3); }
+        .complexity-badge.normal { display: inline-flex; background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.25); color: var(--success); }
+
+        /* ── PLAYLIST ── */
+        .playlist-pane {
+            border-top: 1px solid var(--border);
+            flex: 1; overflow: hidden;
+            display: flex; flex-direction: column; min-height: 0;
         }
         .playlist-header {
-            background-color: #f1f3f5;
-            padding: 10px 15px;
-            font-weight: bold;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 9px 14px; border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
-        
+        .playlist-count {
+            font-family: var(--mono); font-size: .62rem; color: var(--muted);
+            background: var(--bg); border: 1px solid var(--border); padding: 2px 7px; border-radius: 4px;
+        }
+        .btn-add {
+            background: var(--navy); color: #fff; border: none;
+            padding: 5px 11px; border-radius: 5px;
+            font-family: var(--mono); font-size: .67rem; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 4px; transition: background .15s;
+        }
+        .btn-add:hover { background: var(--navy2); }
+        #playlist-list { overflow-y: auto; flex: 1; }
         .playlist-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background 0.2s;
+            display: flex; align-items: center; gap: 11px;
+            padding: 9px 14px; border-bottom: 1px solid var(--border);
+            cursor: pointer; transition: background .12s;
         }
-        .playlist-item:hover { background-color: #f9f9f9; }
-        
-        /* Style pour la vidéo en cours de lecture */
-        .playlist-item.active {
-            background-color: #e7f1ff;
-            border-left: 4px solid #0d6efd;
+        .playlist-item:hover { background: var(--surface2); }
+        .playlist-item.active { background: rgba(37,99,235,.05); border-left: 2px solid var(--accent); }
+        .playlist-thumb { width: 60px; height: 38px; object-fit: cover; border-radius: 4px; background: var(--border); flex-shrink: 0; }
+        .playlist-info { flex: 1; overflow: hidden; }
+        .playlist-title { font-size: .78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .playlist-meta { font-family: var(--mono); font-size: .62rem; color: var(--muted); margin-top: 2px; }
+
+        /* ── SIDEBAR ── */
+        .sidebar { display: flex; flex-direction: column; overflow: hidden; background: var(--surface); }
+
+        .section-header {
+            padding: 9px 14px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
 
-        .playlist-thumb {
-            width: 80px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-right: 15px;
-            background: #eee;
+        /* Participants */
+        .participants-pane { border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .participant-list { padding: 7px; display: flex; flex-direction: column; gap: 3px; }
+        .participant-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 5px 7px; border-radius: 6px; font-family: var(--mono); font-size: .73rem;
+            transition: background .12s;
         }
-        .playlist-info { flex-grow: 1; overflow: hidden; }
-        .playlist-title { font-weight: 600; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .playlist-desc { font-size: 0.8em; color: #666; }
+        .participant-item:hover { background: var(--surface2); }
+        .participant-avatar {
+            width: 24px; height: 24px; border-radius: 50%;
+            background: var(--navy); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .58rem; font-weight: 700; flex-shrink: 0;
+        }
+        .participant-avatar.host { background: var(--accent); }
+        .participant-role { margin-left: auto; font-size: .6rem; color: var(--muted); }
 
-        /* Chat & Sidebar */
-        .sidebar-card {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            overflow: hidden;
+        /* Chat */
+        .chat-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        #messages { flex: 1; overflow-y: auto; padding: 8px; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+        .msg-item {
+            padding: 8px 10px; background: var(--bg);
+            border-radius: 6px; border-left: 2px solid var(--border2); font-size: .76rem;
         }
-        .sidebar-header {
-            background-color: #f8f9fa;
-            padding: 10px 15px;
-            border-bottom: 1px solid #ddd;
-            font-weight: bold;
+        .msg-sender { font-family: var(--mono); font-size: .62rem; color: var(--muted); margin-bottom: 3px; }
+        .chat-footer { padding: 8px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+        #chatInput {
+            flex: 1; background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); padding: 8px 11px; border-radius: 6px;
+            font-family: var(--mono); font-size: .76rem; outline: none; transition: border-color .15s;
         }
-        .sidebar-body { padding: 15px; min-height: 150px; }
+        #chatInput:focus { border-color: var(--accent); }
+        #chatInput::placeholder { color: var(--border2); }
+        .chat-send {
+            background: var(--navy); color: #fff; border: none;
+            padding: 8px 13px; border-radius: 6px;
+            font-family: var(--mono); font-size: .7rem; font-weight: 700; cursor: pointer; transition: background .15s;
+        }
+        .chat-send:hover { background: var(--navy2); }
 
-        /* Modale Recherche */
-        .video-card-small {
-            border: 1px solid #eee;
-            padding: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            gap: 10px;
-            border-radius: 6px;
-            align-items: center;
-            background: #fff;
+        /* Notes */
+        .notes-pane { border-top: 1px solid var(--border); flex-shrink: 0; }
+        .notes-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+        #notesArea {
+            width: 100%; background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); padding: 9px; border-radius: 6px;
+            font-family: var(--mono); font-size: .73rem; line-height: 1.6;
+            resize: none; height: 68px; outline: none; transition: border-color .15s;
         }
-        .video-card-small img { width: 120px; height: auto; border-radius: 4px; }
-        .video-card-info { flex-grow: 1; font-size: 0.9em; }
-        .video-card-info h6 { margin: 0 0 5px 0; font-size: 1em; font-weight: bold; }
+        #notesArea:focus { border-color: var(--accent); }
+        #notesArea::placeholder { color: var(--border2); }
+        .notes-actions { display: flex; gap: 6px; }
+        .btn-note {
+            background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+            padding: 5px 9px; border-radius: 5px; font-family: var(--mono); font-size: .65rem;
+            cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all .12s;
+        }
+        .btn-note:hover { border-color: var(--accent); color: var(--accent); background: rgba(37,99,235,.04); }
+        .timecode-tag {
+            display: inline-flex; align-items: center; gap: 3px;
+            background: rgba(14,165,233,.08); border: 1px solid rgba(14,165,233,.25);
+            color: var(--accent2); padding: 1px 6px; border-radius: 4px;
+            font-family: var(--mono); font-size: .68rem; text-decoration: none; transition: background .12s;
+        }
+        .timecode-tag:hover { background: rgba(14,165,233,.15); }
+        #notesDisplay { padding: 4px; max-height: 88px; overflow-y: auto; font-family: var(--mono); font-size: .73rem; line-height: 1.7; }
+
+        /* Filtres avancés */
+        .filter-pane { border-top: 1px solid var(--border); flex-shrink: 0; }
+        .filter-row { padding: 8px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+        .filter-input {
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); padding: 5px 9px; border-radius: 5px;
+            font-family: var(--mono); font-size: .68rem; outline: none; transition: border-color .15s;
+        }
+        .filter-input:focus { border-color: var(--accent); }
+        .filter-input::placeholder { color: var(--border2); }
+        .filter-input[type="date"] { color-scheme: light; }
+        .btn-filter {
+            background: var(--navy); border: none; color: #fff;
+            padding: 5px 11px; border-radius: 5px; font-family: var(--mono); font-size: .66rem;
+            cursor: pointer; transition: background .15s;
+        }
+        .btn-filter:hover { background: var(--navy2); }
+        #filterResults { padding: 6px 8px; font-family: var(--mono); font-size: .68rem; color: var(--muted); max-height: 80px; overflow-y: auto; }
+        .filter-result-item { padding: 4px 6px; border-bottom: 1px solid var(--border); color: var(--text); }
+
+        /* ── MODAL RECHERCHE ── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,31,61,.45); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 560px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(15,31,61,.18); }
+        .modal-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .modal-title { font-weight: 700; font-size: .98rem; color: var(--navy); }
+        .modal-close { background: none; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: all .12s; }
+        .modal-close:hover { background: var(--surface2); color: var(--text); }
+        .modal-body { padding: 16px 20px; flex: 1; overflow-y: auto; }
+        .modal-row { display: flex; gap: 8px; margin-bottom: 16px; }
+        .modal-input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 13px; border-radius: 7px; font-family: var(--mono); font-size: .8rem; outline: none; transition: border-color .15s; }
+        .modal-input:focus { border-color: var(--accent); }
+        .modal-input::placeholder { color: var(--border2); }
+        .modal-btn { background: var(--navy); color: #fff; border: none; padding: 10px 18px; border-radius: 7px; font-weight: 700; font-size: .8rem; cursor: pointer; transition: background .15s; }
+        .modal-btn:hover { background: var(--navy2); }
+        .video-result { display: flex; gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all .15s; }
+        .video-result:hover { border-color: var(--border2); background: var(--surface2); }
+        .video-result img { width: 96px; height: 58px; object-fit: cover; border-radius: 5px; }
+        .video-result-info h6 { font-size: .82rem; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+        .video-result-info span { font-family: var(--mono); font-size: .68rem; color: var(--muted); }
+
+        /* Lightbox */
+        .lightbox { display: none; position: fixed; inset: 0; background: rgba(15,31,61,.8); z-index: 2000; align-items: center; justify-content: center; }
+        .lightbox.open { display: flex; }
+        .lightbox img { max-width: 90vw; max-height: 85vh; border: 2px solid var(--border); border-radius: 8px; box-shadow: 0 20px 60px rgba(15,31,61,.4); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
     </style>
-    
-    <title id="titre">Room - W2G</title>
 </head>
-<body class="mx-5 mx-md-4">
-    
-    <nav class="navbar container">
-        <a class="navbar-brand" href="#">W2G</a>
-        <div class="">
-            <ul class="navbar-nav d-flex flex-row gap-3 align-items-center" id="nav-auth">
-                
-            </ul>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="nav-bar">
+    <div class="nav-left">
+        <a class="nav-logo" href="../index.html">
+            <div class="nav-logo-dot"></div>W2G
+        </a>
+        <div class="room-badge">
+            <div class="live-dot"></div>
+            <span id="room-name">Room</span>
+            <span style="color:var(--border2)">·</span>
+            <span id="room-id" style="font-size:.6rem"></span>
         </div>
-    </nav>
-
-    <section class="container justify-content-center">
-        <h1 class="text-center">
-            Room : Regardez ensemble !
-        </h1>
-
-		<p class="justify-content-center" id="room-name"></p>
-		<p class="justify-content-center" id="room-id"></p>
-
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <p class="text-center fs-4 mt-3">
-                    Synchronisez votre visionnage avec vos amis. Partagez le lien de la room pour inviter d'autres personnes.
-                </p>
-            </div>
+        <div class="complexity-badge" id="navComplexityBadge"></div>
+    </div>
+    <div class="nav-right">
+        <div class="speed-pill">
+            Vitesse&nbsp;<span class="speed-val" id="speedDisplay">1.0×</span>
         </div>
+        <button class="btn-icon" title="Ajouter une vidéo" onclick="openSearchModal()">
+            <i class="bi bi-plus-lg"></i>
+        </button>
+        <a href="../index.html" class="btn-icon" title="Accueil">
+            <i class="bi bi-house"></i>
+        </a>
+    </div>
+</nav>
 
-        <div class="row mb-2">
-            <div class="col-12 text-end">
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#searchModal">
-                    🔍 Ajouter une vidéo
-                </button>
-            </div>
-        </div>
+<!-- ── CORPS ── -->
+<div class="app-body">
 
-    </section>
+    <!-- ── CENTRE ── -->
+    <div class="center-pane">
+        <div class="main-split">
 
-    <section class="container">
-        <div class="row">
-            <!-- Lecteur vidéo principal -->
-            <div class="col-lg-8">
-                <div class="ratio ratio-16x9 mb-4">
+            <!-- LECTEUR VIDÉO -->
+            <div class="player-wrap">
+                <div class="player-header">
+                    <div class="pane-label">Lecteur vidéo</div>
+                </div>
+                <div class="player-container">
                     <div id="player"></div>
                 </div>
-                <!-- Contrôles de lecture (simulés, à synchroniser via JS/WebSockets) -->
-                <div class="d-flex justify-content-center gap-3 mb-4">
-                    <button class="btn btn-outline-secondary" onclick="playPrev()">⏮ Préc</button>
-                    <button class="btn btn-primary" id="playBtn"><i class="bi bi-play-fill"></i> Play</button>
-                    <button class="btn btn-secondary" id="pauseBtn"><i class="bi bi-pause-fill"></i> Pause</button>
-                    <button class="btn btn-info" id="syncBtn"><i class="bi bi-arrow-clockwise"></i> Synchroniser</button>
-                    <button class="btn btn-outline-secondary" onclick="playNext()">Suiv ⏭</button>
-                </div>
-                <!-- Champ pour changer de vidéo -->
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control" id="videoUrl" placeholder="Collez l'URL d'une vidéo YouTube ou sélectionnez dans la bibliothèque">
-                    <button class="btn btn-outline-secondary" id="loadVideoBtn">Charger</button>
-                </div>
-
-                <div class="playlist-card">
-                    <div class="playlist-header">
-                        <span>📋 Playlist</span>
-                        <span class="badge bg-secondary" id="playlist-count">0 vidéos</span>
+                <div class="player-controls">
+                    <button class="ctrl-btn" onclick="playPrev()"><i class="bi bi-skip-start-fill"></i></button>
+                    <button class="ctrl-btn primary" onclick="doPlay()"><i class="bi bi-play-fill"></i> Play</button>
+                    <button class="ctrl-btn" onclick="doPause()"><i class="bi bi-pause-fill"></i> Pause</button>
+                    <button class="ctrl-btn" onclick="doSync()"><i class="bi bi-arrow-clockwise"></i> Sync</button>
+                    <button class="ctrl-btn" onclick="playNext()"><i class="bi bi-skip-end-fill"></i></button>
+                    <div class="ctrl-speed">
+                        <label>Vitesse</label>
+                        <select id="speedSelect" onchange="setManualSpeed(this.value)">
+                            <option value="0.5">0.5×</option>
+                            <option value="0.75">0.75×</option>
+                            <option value="1" selected>1×</option>
+                            <option value="1.25">1.25×</option>
+                            <option value="1.5">1.5×</option>
+                        </select>
                     </div>
-                    <div id="playlist-list">
-                        </div>
                 </div>
             </div>
-            
-            <!-- Sidebar : Chat et participants -->
-            <div class="col-lg-4">
-                <!-- Liste des participants -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5>Participants (3)</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <!-- Injecté dynamiquement a faire id="participants-list-->
-                            <li class="list-group-item">Vous (Hôte)</li>
-                            <li class="list-group-item">Ami1</li>
-                            <li class="list-group-item">Ami2</li>
-                        </ul>
+
+            <!-- SCRIBBLE-PAD (iframe) -->
+            <div class="board-wrap">
+                <div class="board-header">
+                    <div class="pane-label">Tableau blanc — Scribble-Pad</div>
+                    <div class="board-header-right">
+                        <input type="text" id="padNameInput" class="board-pad-input"
+                               placeholder="Nom du pad…" value="room-w2g">
+                        <button class="board-nav-btn" onclick="navigateToPad()">
+                            <i class="bi bi-arrow-right-circle"></i> Ouvrir
+                        </button>
                     </div>
                 </div>
-                
-                <!-- Chat en temps réel -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Chat</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <ul id="messages"
-                            style="list-style:none; padding:10px; margin:0; height:300px; overflow-y:auto;">
-                        </ul>
-                    </div>
 
-                    <div class="card-footer p-2">
-                        <form id="form" class="d-flex gap-2">
-                        <input id="input"
-                                class="form-control"
-                                autocomplete="off"
-                                placeholder="Message..." />
-                        <button class="btn btn-primary">Send</button>
-                        </form>
+                <div class="board-iframe-wrap">
+                    <!--
+                        iframe vers Scribble-Pad (Phoenix/Elixir, port 4000).
+                        L'X-Frame-Options est volontairement désactivé côté Scribble-Pad
+                        (voir router.ex : "plug :put_secure_browser_headers" commenté).
+                        Route : /pad/:pad_id  →  DrawLive
+                    -->
+                    <iframe
+                        id="scribblePadIframe"
+                        src="http://localhost:4000/pad/room-w2g"
+                        title="Tableau blanc collaboratif Scribble-Pad"
+                        allow="clipboard-write"
+                    ></iframe>
+
+                    <!-- Overlay si Scribble-Pad n'est pas démarré -->
+                    <div class="board-offline" id="boardOffline">
+                        <div class="board-offline-icon"><i class="bi bi-easel2"></i></div>
+                        <p>
+                            Le tableau blanc nécessite que <strong>Scribble-Pad</strong> soit lancé.<br><br>
+                            Dans <code>/tests/Scribble-Pad-main</code> :<br>
+                            <code>mix phx.server</code><br><br>
+                            Puis cliquez sur <strong>Réessayer</strong>.
+                        </p>
+                        <button class="ctrl-btn" onclick="reloadBoard()">
+                            <i class="bi bi-arrow-clockwise"></i> Réessayer
+                        </button>
                     </div>
+                </div>
+
+                <div class="board-footer">
+                    <button class="capture-btn" id="btnCapture" onclick="captureBoard()">
+                        <i class="bi bi-camera"></i> Capturer dans mes notes
+                    </button>
+                    <div class="activity-badge" id="activityBadge">
+                        <i class="bi bi-pencil" style="font-size:.58rem"></i> Dessin en cours
                     </div>
+                    <div class="complexity-badge" id="boardComplexity"></div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <div class="modal fade" id="searchModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Rechercher une vidéo YouTube</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="input-group mb-3">
-                        <input type="text" id="modalSearchInput" class="form-control" placeholder="Rechercher (ex: Jul)...">
-                        <button class="btn btn-primary" onclick="performModalSearch()">Rechercher</button>
-                    </div>
-                    <div id="modalResultsContainer" style="max-height: 400px; overflow-y: auto;">
-                        <p class="text-muted text-center">Les résultats s'afficheront ici...</p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        <!-- PLAYLIST -->
+        <div class="playlist-pane">
+            <div class="playlist-header">
+                <div class="pane-label">Playlist</div>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <span class="playlist-count" id="playlist-count">0 vidéo</span>
+                    <button class="btn-add" onclick="openSearchModal()">
+                        <i class="bi bi-plus"></i> Ajouter
+                    </button>
                 </div>
             </div>
+            <div id="playlist-list"></div>
         </div>
     </div>
 
-    <footer class="container">
-        <div>
-            <hr>
+    <!-- ── SIDEBAR ── -->
+    <div class="sidebar">
+
+        <!-- Participants -->
+        <div class="participants-pane">
+            <div class="section-header">
+                <div class="pane-label">Participants</div>
+            </div>
+            <div class="participant-list" id="participants-list">
+                <div class="participant-item">
+                    <div class="participant-avatar host">V</div>
+                    <span>Vous</span>
+                    <span class="participant-role">Hôte</span>
+                </div>
+            </div>
         </div>
-        <div class="container text-center py-4">
-            <p>&copy; 2024 W2G. Tous droits réservés.</p>
+
+        <!-- Chat -->
+        <div class="chat-pane">
+            <div class="section-header">
+                <div class="pane-label">Chat</div>
+            </div>
+            <ul id="messages"></ul>
+            <div class="chat-footer">
+                <input type="text" id="chatInput" placeholder="Message…" autocomplete="off">
+                <button class="chat-send" id="sendBtn">↑</button>
+            </div>
         </div>
-    </footer>
-    
-    <!-- JS Files -->
-    <script src="../assets/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="../assets/js/jquery.min.js"></script>
-    <script src="../assets/js/jquery.sticky.js"></script>
-     
-    <script src="http://localhost:3004/socket.io/socket.io.js"></script>
-    <script type="module" src="../assets/js/room.js"></script>
-    <script type="module" src="../assets/js/chat.js"></script>
-    <script src="../assets/js/auth-nav.js"></script>
-	<script>
-		//test
-		const room = JSON.parse(localStorage.getItem('roomObject'));
-		console.log(room.name, room.admin);
-		document.getElementById("room-name").innerHTML = "Room "+room.name;
-		document.getElementById("room-id").innerHTML = "id: "+room.id;
-	</script>
+
+        <!-- Notes + timecodes (code camarades — Vignette.js) -->
+        <div class="notes-pane">
+            <div class="section-header">
+                <div class="pane-label">Notes</div>
+            </div>
+            <div class="notes-body">
+                <textarea id="notesArea"
+                    placeholder="Tapez vos notes… Utilisez #hashtag.&#10;Insérez un timecode YouTube avec le bouton ci-dessous.">
+                </textarea>
+                <div class="notes-actions">
+                    <button class="btn-note" onclick="insertTimecode()">
+                        <i class="bi bi-clock"></i> Timecode
+                    </button>
+                    <button class="btn-note" onclick="saveNote()">
+                        <i class="bi bi-floppy"></i> Sauvegarder
+                    </button>
+                </div>
+                <div id="notesDisplay"></div>
+            </div>
+        </div>
+
+        <!-- Filtres avancés (code camarades — filtres.html) -->
+        <div class="filter-pane">
+            <div class="section-header">
+                <div class="pane-label">Filtres avancés</div>
+            </div>
+            <div class="filter-row">
+                <input type="text"  class="filter-input" id="filterTag"   placeholder="#hashtag" style="width:80px">
+                <input type="date"  class="filter-input" id="filterStart" style="width:110px">
+                <input type="date"  class="filter-input" id="filterEnd"   style="width:110px">
+                <button class="btn-filter" onclick="runFilter()">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <div id="filterResults">
+                <span style="font-size:.64rem">Recherchez vos notes par hashtag et plage de dates.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL RECHERCHE VIDÉO ── -->
+<div class="modal-overlay" id="searchModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div class="modal-title">Rechercher une vidéo YouTube</div>
+            <button class="modal-close" onclick="closeSearchModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-row">
+                <input type="text" class="modal-input" id="modalSearchInput"
+                       placeholder="ex: cours algorithmique…">
+                <button class="modal-btn" onclick="performModalSearch()">Rechercher</button>
+            </div>
+            <div id="modalResultsContainer">
+                <p style="font-family:var(--mono);font-size:.76rem;color:var(--muted)">
+                    Les résultats s'afficheront ici…
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── LIGHTBOX ── -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="Capture du tableau">
+</div>
+
+<!-- ── SCRIPTS ── -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+
+// ═══════════════════════════════════════════════════
+// 1. ROOM INFO
+// ═══════════════════════════════════════════════════
+var room = JSON.parse(localStorage.getItem('roomObject') || '{"name":"Room","id":"—"}');
+document.getElementById('room-name').textContent = room.name || 'Room';
+document.getElementById('room-id').textContent   = 'id: ' + (room.id || '—');
+
+// Pad nommé d'après l'id de la room → chaque room a son tableau dédié
+var defaultPadName = 'room-' + (String(room.id || 'w2g').replace(/[^a-zA-Z0-9\-]/g, '-'));
+document.getElementById('padNameInput').value = defaultPadName;
+document.getElementById('scribblePadIframe').src = 'http://localhost:4000/pad/' + defaultPadName;
 
 
-    <script type="module">
-        import {Video} from "../assets/js/model/Video.js"
-        
-        const SERVER_URL = 'http://localhost:3002/search'; 
+// ═══════════════════════════════════════════════════
+// 2. SCRIBBLE-PAD — iframe + postMessage
+//    Draw.svelte émet :
+//      window.parent.postMessage('draw_event', '*')  → début de trait
+//      window.parent.postMessage('draw_active', '*') → fin de trait (mouseup)
+// ═══════════════════════════════════════════════════
+var iframe    = document.getElementById('scribblePadIframe');
+var offlineEl = document.getElementById('boardOffline');
 
-        // --- 1. DONNÉES DE LA PLAYLIST (Fausses vidéos par défaut) ---
-        let playlist = [
-            {
-                id: 'M7lc1UVf-VE',
-                title: 'Video par defaut',
-                thumb: 'https://img.youtube.com/vi/rTwzswSVjbo/mqdefault.jpg'
-            },
-            {
-                id: 'ePiF7BWB6_s',
-                title: 'Pourquoi 0.1 + 0.2 = 0.30000000000000004 ?',
-                thumb: 'https://i.ytimg.com/vi/ePiF7BWB6_s/default.jpg'
-            }
-        ];
+iframe.addEventListener('load', function () { offlineEl.classList.add('hidden'); });
+iframe.addEventListener('error', function () { offlineEl.classList.remove('hidden'); });
 
-        let currentIndex = 0; // On commence par la première vidéo
+function navigateToPad() {
+    var name = document.getElementById('padNameInput').value.trim();
+    if (!name) return;
+    var clean = name.replace(/[^a-zA-Z0-9\-_]/g, '-').toLowerCase();
+    iframe.src = 'http://localhost:4000/pad/' + clean;
+    offlineEl.classList.add('hidden');
+}
+document.getElementById('padNameInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') navigateToPad();
+});
+function reloadBoard() { iframe.src = iframe.src; offlineEl.classList.add('hidden'); }
 
-        // --- 2. FONCTIONS DE GESTION DU LECTEUR ---
+// ── Réception des postMessage de Scribble-Pad ──
+var drawEvents        = [];
+var inactivityTimer   = null;
+var actBadgeEl        = document.getElementById('activityBadge');
+var actBadgeTimer     = null;
 
-        // Appelé au chargement de la page
-        window.onload = function() {
-            renderPlaylist(); // Afficher la liste
-            loadVideoAtIndex(0); // Charger la première
-        };
+window.addEventListener('message', function (event) {
+    if (event.origin !== 'http://localhost:4000') return;
 
-        function loadVideoAtIndex(index) {
-            if (index < 0 || index >= playlist.length) return; // Sécurité
+    if (event.data === 'draw_event') {
+        drawEvents.push(Date.now());
+        showActivityBadge();
+        checkAdaptiveSpeed();
 
-            currentIndex = index;
-            const video = playlist[index];
-            
-            const video_ = new Video(video.id);
-            window.player.loadVideo(video_);
-            window.player.sendState("changeState");
+    } else if (event.data === 'draw_active') {
+        // Fin de trait → seulement reset du timer d'inactivité
+        showActivityBadge();
+        resetInactivityTimer();
+    }
+});
 
-            // Mise à jour visuelle de la liste
-            renderPlaylist();
-        }
+function showActivityBadge() {
+    actBadgeEl.classList.add('visible');
+    clearTimeout(actBadgeTimer);
+    actBadgeTimer = setTimeout(function () { actBadgeEl.classList.remove('visible'); }, 2000);
+}
 
-        // Bouton SUIVANT
-        function playNext() {
-            if (currentIndex < playlist.length - 1) {
-                loadVideoAtIndex(currentIndex + 1);
-            } else {
-                alert("C'est la dernière vidéo !");
-            }
-        }
+// ── Vitesse adaptative intelligente (algorithme de test-complexite.html) ──
+//    > 20 draw_event en 10 s → 0.5×
+//    Inactivité 15 s         → retour 1×
+function checkAdaptiveSpeed() {
+    var now = Date.now();
+    drawEvents = drawEvents.filter(function (t) { return now - t <= 10000; });
 
-        // Bouton PRÉCÉDENT
-        function playPrev() {
-            if (currentIndex > 0) {
-                loadVideoAtIndex(currentIndex - 1);
-            } else {
-                alert("Vous êtes au début de la playlist.");
-            }
-        }
+    if (drawEvents.length > 20) {
+        applySpeed(0.5, 'slow');
+    }
+    resetInactivityTimer();
+}
 
-        // --- 3. GESTION DE L'AFFICHAGE DE LA PLAYLIST ---
-        
-        function renderPlaylist() {
-            const listContainer = document.getElementById('playlist-list');
-            const countLabel = document.getElementById('playlist-count');
-            
-            listContainer.innerHTML = ''; // On vide la liste actuelle
-            countLabel.innerText = playlist.length + " vidéos";
+function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(function () {
+        drawEvents = [];
+        applySpeed(1.0, 'normal');
+        setTimeout(function () {
+            document.getElementById('boardComplexity').className  = 'complexity-badge';
+            document.getElementById('navComplexityBadge').className = 'complexity-badge';
+        }, 3000);
+    }, 15000);
+}
 
-            playlist.forEach((video, index) => {
-                // On vérifie si c'est la vidéo active
-                const isActive = (index === currentIndex) ? 'active' : '';
-                const statusText = (index === currentIndex) ? '▶ Lecture en cours' : 'En attente';
+function applySpeed(rate, state) {
+    if (ytPlayer && ytPlayer.setPlaybackRate) ytPlayer.setPlaybackRate(rate);
+    document.getElementById('speedDisplay').textContent = rate + '×';
+    document.getElementById('speedSelect').value        = String(rate);
 
-                const itemHTML = `
-                    <div class="playlist-item ${isActive}" onclick="loadVideoAtIndex(${index})">
-                        <img src="${video.thumb}" class="playlist-thumb" alt="thumb">
-                        <div class="playlist-info">
-                            <div class="playlist-title">${video.title}</div>
-                            <div class="playlist-desc">${statusText}</div>
-                        </div>
-                    </div>
-                `;
-                listContainer.insertAdjacentHTML('beforeend', itemHTML);
-            });
-        }
+    var bb = document.getElementById('boardComplexity');
+    var nb = document.getElementById('navComplexityBadge');
+    if (state === 'slow') {
+        bb.className = 'complexity-badge slow';   bb.textContent = '⚡ Schéma complexe · 0.5×';
+        nb.className = 'complexity-badge slow';   nb.textContent = '⚡ Ralenti';
+    } else {
+        bb.className = 'complexity-badge normal'; bb.textContent = '✓ Vitesse normale';
+        nb.className = 'complexity-badge normal'; nb.textContent = '✓ Normale';
+    }
+}
 
-        // --- 4. RECHERCHE & AJOUT (Reste identique) ---
-        async function performModalSearch() {
-            const query = document.getElementById('modalSearchInput').value;
-            const container = document.getElementById('modalResultsContainer');
-            if (!query) return;
-            container.innerHTML = '<div class="text-center p-3">Chargement...</div>';
-            try {
-                const response = await fetch(`${SERVER_URL}?q=${encodeURIComponent(query)}`);
-                const data = await response.json();
-                displayModalResults(data.items);
-            } catch (error) {
-                console.error(error);
-                container.innerHTML = `<p class="text-danger">Erreur: ${error.message}</p>`;
-            }
-        }
+// ── Capture du tableau ──
+// Scribble-Pad est cross-origin → impossible de lire son canvas.
+// On insère un lien vers le pad + le timecode vidéo courant.
+function captureBoard() {
+    var btn = document.getElementById('btnCapture');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass"></i> Capture…';
 
-        function displayModalResults(videos) {
-            const container = document.getElementById('modalResultsContainer');
-            container.innerHTML = ''; 
-            if (!videos || videos.length === 0) {
-                container.innerHTML = '<p>Aucune vidéo trouvée.</p>';
+    var padName   = document.getElementById('padNameInput').value.trim() || defaultPadName;
+    var padUrl    = 'http://localhost:4000/pad/' + padName;
+    var timestamp = (ytPlayer && ytPlayer.getCurrentTime) ? Math.floor(ytPlayer.getCurrentTime()) : 0;
+    var timeStr   = new Date().toLocaleTimeString('fr-FR');
+
+    var display = document.getElementById('notesDisplay');
+    var entry   = document.createElement('div');
+    entry.style.cssText = 'padding:4px 0;border-bottom:1px solid var(--border);margin-bottom:4px;font-size:.72rem;';
+    entry.innerHTML =
+        '<span style="font-family:var(--mono);color:var(--muted);font-size:.62rem">' + timeStr + '</span> — ' +
+        '<a href="' + padUrl + '" target="_blank" ' +
+           'style="color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:.7rem;">' +
+           '<i class="bi bi-easel2"></i> Voir le tableau Scribble-Pad</a>' +
+        (timestamp > 0
+            ? ' · <a class="timecode-tag" href="https://youtu.be/' +
+              ((playlist[currentIndex] || {}).id || '') + '?t=' + timestamp + '" target="_blank">' +
+              '<i class="bi bi-clock" style="font-size:.58rem"></i> ' +
+              String(Math.floor(timestamp / 60)).padStart(2, '0') + ':' +
+              String(timestamp % 60).padStart(2, '0') + '</a>'
+            : '');
+    display.appendChild(entry);
+
+    // Envoi API notes (code camarades)
+    fetch('http://localhost:3002/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            user_id: (JSON.parse(localStorage.getItem('user') || '{}') || {}).id || 1,
+            contenu: (document.getElementById('notesArea').value || 'Capture tableau') +
+                     ' [pad:' + padName + ']',
+            timecode: String(timestamp)
+        })
+    }).catch(function () {});
+
+    setTimeout(function () {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-camera"></i> Capturer dans mes notes';
+    }, 1200);
+}
+
+
+// ═══════════════════════════════════════════════════
+// 3. YOUTUBE PLAYER
+// ═══════════════════════════════════════════════════
+var ytPlayer     = null;
+var playlist     = [{ id: 'M7lc1UVf-VE', title: 'Vidéo par défaut', thumb: 'https://img.youtube.com/vi/M7lc1UVf-VE/mqdefault.jpg' }];
+var currentIndex = 0;
+
+function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('player', {
+        height: '100%', width: '100%',
+        videoId: playlist[0].id,
+        playerVars: { playsinline: 1 },
+        events: { onReady: function () {}, onStateChange: function () {} }
+    });
+}
+
+function loadVideo(id) { if (ytPlayer && ytPlayer.loadVideoById) ytPlayer.loadVideoById(id); }
+function doPlay()       { if (ytPlayer) ytPlayer.playVideo(); }
+function doPause()      { if (ytPlayer) ytPlayer.pauseVideo(); }
+function doSync()       { if (ytPlayer && ytPlayer.getCurrentTime) ytPlayer.seekTo(ytPlayer.getCurrentTime(), true); }
+function playPrev()     { if (currentIndex > 0) { currentIndex--; loadVideo(playlist[currentIndex].id); renderPlaylist(); } }
+function playNext()     { if (currentIndex < playlist.length - 1) { currentIndex++; loadVideo(playlist[currentIndex].id); renderPlaylist(); } }
+function setManualSpeed(v) {
+    if (ytPlayer && ytPlayer.setPlaybackRate) ytPlayer.setPlaybackRate(parseFloat(v));
+    document.getElementById('speedDisplay').textContent = v + '×';
+}
+
+function renderPlaylist() {
+    var list = document.getElementById('playlist-list');
+    list.innerHTML = '';
+    playlist.forEach(function (v, i) {
+        var item = document.createElement('div');
+        item.className = 'playlist-item' + (i === currentIndex ? ' active' : '');
+        item.innerHTML =
+            '<img class="playlist-thumb" src="' + v.thumb + '" alt="">' +
+            '<div class="playlist-info">' +
+              '<div class="playlist-title">' + v.title + '</div>' +
+              '<div class="playlist-meta">YouTube · ' + v.id + '</div>' +
+            '</div>';
+        item.onclick = (function (idx, vid) {
+            return function () { currentIndex = idx; loadVideo(vid); renderPlaylist(); };
+        })(i, v.id);
+        list.appendChild(item);
+    });
+    document.getElementById('playlist-count').textContent =
+        playlist.length + ' vidéo' + (playlist.length > 1 ? 's' : '');
+}
+renderPlaylist();
+
+
+// ═══════════════════════════════════════════════════
+// 4. TIMECODES (format [|videoId:secondes] — Vignette.js)
+// ═══════════════════════════════════════════════════
+function insertTimecode() {
+    if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+    var sec   = Math.floor(ytPlayer.getCurrentTime());
+    var vidId = (playlist[currentIndex] || {}).id || '';
+    var tag   = '[|' + vidId + ':' + sec + ']';
+    var area  = document.getElementById('notesArea');
+    var pos   = area.selectionStart;
+    area.value = area.value.slice(0, pos) + tag + area.value.slice(pos);
+    area.selectionStart = area.selectionEnd = pos + tag.length;
+    area.focus();
+}
+
+function saveNote() {
+    var text = document.getElementById('notesArea').value.trim();
+    if (!text) return;
+
+    // Rendu timecodes cliquables
+    var rendered = text.replace(/\[\|([^:]+):(\d+)\]/g, function (match, vid, sec) {
+        var mm = String(Math.floor(sec / 60)).padStart(2, '0');
+        var ss = String(sec % 60).padStart(2, '0');
+        return '<a class="timecode-tag" href="https://youtu.be/' + vid + '?t=' + sec +
+               '" target="_blank"><i class="bi bi-clock" style="font-size:.58rem"></i> ' + mm + ':' + ss + '</a>';
+    });
+    var p = document.createElement('p');
+    p.innerHTML = rendered;
+    p.style.cssText = 'margin:4px 0;font-size:.73rem;line-height:1.7;';
+    document.getElementById('notesDisplay').appendChild(p);
+
+    fetch('http://localhost:3002/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            user_id: (JSON.parse(localStorage.getItem('user') || '{}') || {}).id || 1,
+            contenu: text
+        })
+    }).catch(function () {});
+
+    document.getElementById('notesArea').value = '';
+}
+
+
+// ═══════════════════════════════════════════════════
+// 5. FILTRES AVANCÉS (code camarades — filtres.html)
+// ═══════════════════════════════════════════════════
+function runFilter() {
+    var tag   = document.getElementById('filterTag').value.trim();
+    var start = document.getElementById('filterStart').value;
+    var end   = document.getElementById('filterEnd').value;
+    var zone  = document.getElementById('filterResults');
+
+    if (tag && !tag.startsWith('#')) tag = '#' + tag;
+    zone.innerHTML = '<span style="color:var(--accent2);font-size:.64rem">Recherche SQL en cours…</span>';
+
+    fetch('http://localhost:3002/api/search-dates?tag=' + encodeURIComponent(tag) +
+          '&start=' + start + '&end=' + end)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (!data.length) {
+                zone.innerHTML = '<span style="color:var(--muted);font-size:.64rem">Aucune note trouvée.</span>';
                 return;
             }
-            for (const item of videos) {
-                if (item.id.kind !== 'youtube#video') continue;
-                const title = item.snippet.title;
-                const thumbnail = item.snippet.thumbnails.default.url;
-                const videoId = item.id.videoId;
-                const safeTitle = title.replace(/'/g, "\\'"); 
+            zone.innerHTML = data.map(function (note) {
+                return '<div class="filter-result-item">' +
+                    '<span style="color:var(--accent);font-size:.6rem">' + tag + '</span>' +
+                    '<span style="color:var(--muted);font-size:.6rem;float:right">' +
+                    new Date(note.created_at).toLocaleDateString('fr-FR') + '</span>' +
+                    '<div style="font-size:.7rem;margin-top:2px">' +
+                    (note.contenu || '').slice(0, 80) + '…</div></div>';
+            }).join('');
+        })
+        .catch(function () {
+            zone.innerHTML = '<span style="color:var(--muted);font-size:.64rem">Serveur non joignable.</span>';
+        });
+}
 
-                const div = document.createElement('div');
-                div.className = 'video-card-small';
-                div.innerHTML = `
-                    <img src="${thumbnail}" alt="miniature">
-                    <div class="video-card-info">
-                        <h6>${title}</h6>
-                    </div>
-                    <button class="btn btn-sm btn-success" onclick="addVideoToPlaylist('${videoId}', '${safeTitle}', '${thumbnail}')">
-                        Ajouter
-                    </button>
-                `;
-                container.appendChild(div);
+
+// ═══════════════════════════════════════════════════
+// 6. RECHERCHE YOUTUBE
+// ═══════════════════════════════════════════════════
+function openSearchModal()  { document.getElementById('searchModal').classList.add('open'); }
+function closeSearchModal() { document.getElementById('searchModal').classList.remove('open'); }
+document.getElementById('searchModal').addEventListener('click', function (e) {
+    if (e.target === this) closeSearchModal();
+});
+document.getElementById('modalSearchInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') performModalSearch();
+});
+
+function performModalSearch() {
+    var q = document.getElementById('modalSearchInput').value.trim();
+    if (!q) return;
+    var container = document.getElementById('modalResultsContainer');
+    container.innerHTML = '<p style="font-family:var(--mono);font-size:.76rem;color:var(--muted)">Recherche en cours…</p>';
+
+    fetch('http://localhost:3002/search?q=' + encodeURIComponent(q))
+        .then(function (r) { return r.json(); })
+        .then(function (videos) {
+            if (!videos.length) {
+                container.innerHTML = '<p style="font-family:var(--mono);font-size:.76rem;color:var(--muted)">Aucun résultat.</p>';
+                return;
             }
-        }
+            container.innerHTML = videos.map(function (v) {
+                var safeTitle = (v.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                return '<div class="video-result" onclick="addToPlaylist(\'' +
+                       v.id + '\',\'' + safeTitle + '\',\'' + v.thumb + '\')">' +
+                       '<img src="' + v.thumb + '" alt="">' +
+                       '<div class="video-result-info"><h6>' + v.title + '</h6>' +
+                       '<span>' + v.id + '</span></div></div>';
+            }).join('');
+        })
+        .catch(function () {
+            container.innerHTML = '<p style="font-family:var(--mono);font-size:.76rem;color:var(--muted)">Erreur de connexion.</p>';
+        });
+}
 
-        function addVideoToPlaylist(videoId, title, thumbnail) {
-            // Ajouter au tableau JS
-            playlist.push({ id: videoId, title: title, thumb: thumbnail });
-            
-            // Mettre à jour l'affichage
-            renderPlaylist();
+function addToPlaylist(id, title, thumb) {
+    playlist.push({ id: id, title: title, thumb: thumb });
+    renderPlaylist();
+    closeSearchModal();
+}
 
-            // Fermer la modale
-            const modalElement = document.getElementById('searchModal');
-            const modalInstance = bootstrap.Modal.getInstance(modalElement);
-            modalInstance.hide();
-            
-            // Si c'était la seule vidéo (la liste était vide avant), on la lance
-            if (playlist.length === 1) {
-                loadVideoAtIndex(0);
-            }
-        }
 
-        window.loadVideoAtIndex = loadVideoAtIndex;
-        window.playNext = playNext;
-        window.playPrev = playPrev;
-        window.performModalSearch = performModalSearch;
-        window.addVideoToPlaylist = addVideoToPlaylist;
-    </script>
+// ═══════════════════════════════════════════════════
+// 7. CHAT (Socket.IO + fallback local)
+// ═══════════════════════════════════════════════════
+function appendMessage(username, text) {
+    var ul = document.getElementById('messages');
+    var li = document.createElement('li');
+    li.className = 'msg-item';
+    li.innerHTML = '<div class="msg-sender">' + username + '</div><div>' + text + '</div>';
+    ul.appendChild(li);
+    ul.scrollTop = ul.scrollHeight;
+}
+
+function sendMsg() {
+    var input = document.getElementById('chatInput');
+    var text  = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    if (typeof socket !== 'undefined' && socket.emit) {
+        var u = JSON.parse(localStorage.getItem('user') || '{"username":"Moi"}');
+        socket.emit('chat message', { text: text, username: u.username || 'Moi' });
+    } else {
+        appendMessage('Vous', text);
+    }
+}
+document.getElementById('sendBtn').onclick = sendMsg;
+document.getElementById('chatInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') sendMsg();
+});
+
+try {
+    var socket = io('http://localhost:3004');
+    socket.on('chat message', function (data) { appendMessage(data.username || 'Anonyme', data.text); });
+} catch (e) {
+    console.info('Socket.IO non disponible — mode local activé.');
+}
+
+
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+</script>
+
+<script src="http://localhost:3004/socket.io/socket.io.js"></script>
+<script src="../assets/js/auth-nav.js"></script>
+
 </body>
 </html>
