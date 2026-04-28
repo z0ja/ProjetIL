@@ -1,91 +1,253 @@
 <!DOCTYPE html>
-<html lang="en">
+
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <link href="../assets/css/styles.css" rel="stylesheet" crossorigin="anonymous">
+    <title>Connexion — W2G</title>
     <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap" rel="stylesheet">
-    
-    <title>Connexion - W2G</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg:       #f4f5f7;
+            --surface:  #ffffff;
+            --surface2: #f0f2f5;
+            --border:   #e2e5eb;
+            --border2:  #cdd2da;
+            --navy:     #0f1f3d;
+            --navy2:    #1a3260;
+            --accent:   #2563eb;
+            --accent2:  #0ea5e9;
+            --success:  #10b981;
+            --danger:   #ef4444;
+            --text:     #0f1f3d;
+            --muted:    #64748b;
+            --mono:     'DM Mono', monospace;
+            --display:  'Syne', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            font-family: var(--display);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* NAV */
+        .nav-bar {
+            height: 54px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: var(--mono);
+            font-size: .95rem;
+            letter-spacing: .08em;
+            color: var(--navy);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .nav-logo-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        /* CONTAINER */
+        .login-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 360px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 10px 30px rgba(15,31,61,.08);
+        }
+
+        .login-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            font-family: var(--mono);
+            font-size: .65rem;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 9px 11px;
+            border-radius: 6px;
+            font-family: var(--mono);
+            font-size: .8rem;
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+        }
+
+        .form-input::placeholder {
+            color: var(--border2);
+        }
+
+        .login-btn {
+            width: 100%;
+            margin-top: 10px;
+            background: var(--navy);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: var(--mono);
+            font-size: .75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .login-btn:hover {
+            background: var(--navy2);
+        }
+
+        .login-footer {
+            margin-top: 14px;
+            text-align: center;
+            font-size: .72rem;
+            color: var(--muted);
+        }
+
+        .login-footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            display: none;
+            background: rgba(239,68,68,.08);
+            border: 1px solid rgba(239,68,68,.3);
+            color: var(--danger);
+            font-size: .72rem;
+            padding: 6px 8px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
-<body class="mx-5 mx-md-4">
-    
-    <nav class="navbar container">
-        <a class="navbar-brand" href="#">W2G</a>
-        <div class="">
-            <ul class="navbar-nav d-flex flex-row gap-3 align-items-center" id="nav-auth">
-                <li class="nav-item">
-                    <a class="nav-link" href="../index.html">Accueil</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="room.html">Room</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="login.html">Connexion</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="register.html">S'inscrire</a>
-                </li>
-            </ul>
-        </div>
+<body>
+
+    <nav class="nav-bar">
+        <a class="nav-logo" href="../index.html">
+            <div class="nav-logo-dot"></div>W2G
+        </a>
     </nav>
 
-    <section class="container justify-content-center">
-        <h1 class="text-center">
-            Connexion à W2G
-        </h1>
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <p class="text-center fs-4 mt-3">
-                    Connectez-vous pour accéder à vos rooms et regarder des vidéos en synchronisation avec vos amis.
-                </p>
-            </div>
-        </div>
-    </section>
+    <div class="login-container">
+        <div class="login-box">
 
-    <section class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <form>
-                    <div class="mb-3">
-                        <label for="emailPassword" class="form-label">Mail</label>
-                        <input type="email" class="form-control" id="loginEmail" placeholder="Votre adresse e-mail" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="loginPassword" class="form-label">Mot de passe</label>
-                        <input type="password" class="form-control" id="loginPassword" placeholder="Votre mot de passe" required>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="rememberMe">
-                        <label class="form-check-label" for="rememberMe">Se souvenir de moi</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100">Se connecter</button>
-                    <div class="text-center mt-3">
-                        <a href="register.html">Pas encore de compte ? S'inscrire</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
 
-    <footer class="container">
-        <div>
-            <hr>
+        <div class="login-title">Connexion</div>
+
+        <div class="error-msg" id="errorMsg">Identifiants invalides</div>
+
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="email" class="form-input" placeholder="ex: user@mail.com">
         </div>
-        <div class="container text-center py-4">
-            <p>&copy; 2024 W2G. Tous droits réservés.</p>
+
+        <div class="form-group">
+            <label class="form-label">Mot de passe</label>
+            <input type="password" id="password" class="form-input" placeholder="••••••••">
         </div>
-    </footer>
-    
-    <!-- JS Files -->
-    <script src="../assets/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="../assets/js/jquery.min.js"></script>
-    <script src="../assets/js/jquery.sticky.js"></script>
-    
-    <script src="../assets/js/login.js"></script>
+
+        <button class="login-btn" onclick="login()">
+            <i class="bi bi-box-arrow-in-right"></i> Se connecter
+        </button>
+
+        <div class="login-footer">
+            Pas encore de compte ?
+            <a href="register.html">Créer un compte</a>
+        </div>
+
+    </div>
+    ```
+
+    </div>
+
+<script>
+function login() {
+    var email = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value.trim();
+    var error = document.getElementById('errorMsg');
+
+    if (!email || !password) {
+        error.style.display = 'block';
+        error.textContent = "Veuillez remplir tous les champs.";
+        return;
+    }
+
+    fetch('http://localhost:3002/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            error.style.display = 'block';
+            error.textContent = data.error;
+            return;
+        }
+
+        // Stockage user
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Redirection
+        window.location.href = '../index.html';
+    })
+    .catch(() => {
+        error.style.display = 'block';
+        error.textContent = "Serveur non joignable.";
+    });
+}
+</script>
+
 </body>
 </html>
