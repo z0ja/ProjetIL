@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion — W2G</title>
     <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
+    <link href="../assets/css/styles.css" rel="stylesheet" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -181,73 +182,37 @@
 
     <div class="login-container">
         <div class="login-box">
+        <form>
 
+            <div class="login-title">Connexion</div>
 
-        <div class="login-title">Connexion</div>
+            <div class="error-msg" id="errorMsg">Identifiants invalides</div>
 
-        <div class="error-msg" id="errorMsg">Identifiants invalides</div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="loginEmail" class="form-input" placeholder="ex: user@mail.com">
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" id="email" class="form-input" placeholder="ex: user@mail.com">
-        </div>
+            <div class="form-group">
+                <label class="form-label">Mot de passe</label>
+                <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">Mot de passe</label>
-            <input type="password" id="password" class="form-input" placeholder="••••••••">
-        </div>
+            <button class="login-btn" type="submit">
+                <i class="bi bi-box-arrow-in-right"></i> Se connecter
+            </button>
 
-        <button class="login-btn" onclick="login()">
-            <i class="bi bi-box-arrow-in-right"></i> Se connecter
-        </button>
+            <div class="login-footer">
+                Pas encore de compte ?
+                <a href="register.html">Créer un compte</a>
+            </div>
 
-        <div class="login-footer">
-            Pas encore de compte ?
-            <a href="register.html">Créer un compte</a>
-        </div>
-
-    </div>
-    ```
-
+        </form>
     </div>
 
-<script>
-function login() {
-    var email = document.getElementById('email').value.trim();
-    var password = document.getElementById('password').value.trim();
-    var error = document.getElementById('errorMsg');
+    </div>
 
-    if (!email || !password) {
-        error.style.display = 'block';
-        error.textContent = "Veuillez remplir tous les champs.";
-        return;
-    }
-
-    fetch('http://localhost:3002/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, password: password })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            error.style.display = 'block';
-            error.textContent = data.error;
-            return;
-        }
-
-        // Stockage user
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        // Redirection
-        window.location.href = '../index.html';
-    })
-    .catch(() => {
-        error.style.display = 'block';
-        error.textContent = "Serveur non joignable.";
-    });
-}
-</script>
+    <script src="../assets/js/login.js"></script>
 
 </body>
 </html>
