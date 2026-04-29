@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
+    <link href="../assets/css/styles.css" rel="stylesheet" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <title>Inscription — W2G</title>
     <style>
@@ -295,38 +296,54 @@ document.getElementById('confirmPassword').addEventListener('input', function ()
     this.classList.remove('invalid');
 });
 
-// Soumission
+// Soumission — champs alignés avec register.js : { username, email, password }
 document.getElementById('registerForm').addEventListener('submit', async function (e) {
     e.preventDefault();
-    var msg  = document.getElementById('registerMessage');
-    var btn  = document.getElementById('submitBtn');
-    var name = document.getElementById('signupName').value.trim();
-    var email= document.getElementById('signupEmail').value.trim();
-    var pw   = document.getElementById('signupPassword').value;
-    var conf = document.getElementById('confirmPassword').value;
-    var ok   = document.getElementById('agreeTerms').checked;
+    var msg      = document.getElementById('registerMessage');
+    var btn      = document.getElementById('submitBtn');
+    var username = document.getElementById('signupName').value.trim();   // → username (register.js)
+    var email    = document.getElementById('signupEmail').value.trim();
+    var pw       = document.getElementById('signupPassword').value;
+    var conf     = document.getElementById('confirmPassword').value;
+    var ok       = document.getElementById('agreeTerms').checked;
 
     msg.className = ''; msg.textContent = '';
 
-    if (!name || !email || !pw) { msg.className = 'msg-error'; msg.textContent = 'Tous les champs sont obligatoires.'; return; }
+    if (!username || !email || !pw) {
+        msg.className = 'msg-error'; msg.textContent = 'Tous les champs sont obligatoires.'; return;
+    }
     if (pw !== conf) {
         msg.className = 'msg-error'; msg.textContent = 'Les mots de passe ne correspondent pas.';
         document.getElementById('confirmPassword').classList.add('invalid'); return;
     }
-    if (!ok) { msg.className = 'msg-error'; msg.textContent = "Veuillez accepter les conditions d'utilisation."; return; }
+    if (!ok) {
+        msg.className = 'msg-error'; msg.textContent = "Veuillez accepter les conditions d'utilisation."; return;
+    }
 
     btn.disabled = true; btn.textContent = 'Création en cours…';
+
     try {
+        // Corps aligné avec register.js : const { username, email, password } = req.body
         var r = await fetch('http://localhost:3002/api/register', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password: pw })
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: username, email: email, password: pw })
         });
         var d = await r.json();
+
         if (r.ok) {
-            msg.className = 'msg-success'; msg.textContent = '✓ Compte créé avec succès. Redirection…';
-            setTimeout(() => window.location.href = 'login.html', 1500);
+            // Stocker le user en localStorage (utilisé par VideoPlayer / room.html)
+            localStorage.setItem('user', JSON.stringify({
+                id:       d.user.id,
+                username: d.user.username,
+                email:    d.user.email
+            }));
+            msg.className = 'msg-success';
+            msg.textContent = '✓ Compte créé avec succès. Redirection vers la connexion…';
+            setTimeout(function () { window.location.href = 'login.html'; }, 1500);
         } else {
-            msg.className = 'msg-error'; msg.textContent = d.message || "Erreur lors de l'inscription.";
+            msg.className = 'msg-error';
+            msg.textContent = d.error || d.message || "Erreur lors de l'inscription.";
         }
     } catch (err) {
         msg.className = 'msg-error'; msg.textContent = 'Impossible de joindre le serveur.';
@@ -336,5 +353,6 @@ document.getElementById('registerForm').addEventListener('submit', async functio
 });
 </script>
 <script src="../assets/js/auth-nav.js"></script>
+<script src="../assets/js/register.js"></script>
 </body>
 </html>
