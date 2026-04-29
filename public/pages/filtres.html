@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="http://localhost:3004/socket.io/socket.io.js"></script>
     <title>Mes Notes — W2G</title>
     <style>
         /* ── TOKENS (identiques aux autres pages) ── */
@@ -328,6 +329,24 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
+        /* ── LECTEUR MODAL (VIGNETTE) ── */
+        #overlay-modale {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #conteneur-lecteur {
+            position: relative;
+        }
+
         /* ── RESPONSIVE ── */
         @media (max-width: 640px) {
             .nav-bar { padding: 0 16px; }
@@ -448,6 +467,13 @@
         <i class="bi bi-x-lg"></i>
     </div>
     <img id="lightboxImg" src="" alt="Capture agrandie">
+</div>
+
+<!-- ── LECTEUR MODAL (VIGNETTE) ── -->
+<div id="overlay-modale">
+    <div id="conteneur-lecteur">
+        <div id="player"></div>
+    </div>
 </div>
 
 <!-- ── FOOTER ── -->
@@ -595,8 +621,8 @@ async function lancerRecherche() {
             var contenuRendu = contenu.replace(/\[\|([^:]+):(\d+)\]/g, function (match, vid, sec) {
                 var mm = String(Math.floor(sec / 60)).padStart(2, '0');
                 var ss = String(sec % 60).padStart(2, '0');
-                return '<a class="tc" href="https://youtu.be/' + vid + '?t=' + sec +
-                       '" target="_blank"><i class="bi bi-clock" style="font-size:.6rem"></i> ' +
+                return '<a class="tc" href="javascript:void(0)" onclick="window.ouvrirLecteur(\'' + vid + '\', ' + sec + ')">' +
+                       '<i class="bi bi-clock" style="font-size:.6rem"></i> ' +
                        mm + ':' + ss + '</a>';
             });
 
@@ -652,6 +678,30 @@ function closeLightbox() {
 }
 document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeLightbox();
+});
+</script>
+
+<script type="module">
+import {Vignette} from "../assets/js/model/Vignette.js";
+import {Video} from "../assets/js/model/Video.js";
+import {PlayerState} from "../assets/js/model/PlayerState.js";
+
+let videoParDefaut = new Video("M7lc1UVf-VE");
+let etatParDefaut = new PlayerState("M7lc1UVf-VE", "paused", 0);
+window.player = new Vignette(videoParDefaut, etatParDefaut);
+
+const overlayModale = document.getElementById('overlay-modale');
+
+window.ouvrirLecteur = function(videoId, temps) {
+    let nouvelEtat = new PlayerState(videoId, "paused", parseInt(temps));
+    window.player.setState(nouvelEtat);
+    overlayModale.style.display = 'flex';
+};
+
+overlayModale.addEventListener('click', (evenement) => {
+    if (evenement.target === overlayModale) {
+        overlayModale.style.display = 'none';
+    }
 });
 </script>
 
