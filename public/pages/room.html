@@ -395,6 +395,9 @@
         <div class="speed-pill">
             Vitesse&nbsp;<span class="speed-val" id="speedDisplay">1.0×</span>
         </div>
+        <a href="filtres.html" class="btn-icon" title="Mes notes & filtres avancés" style="width:auto;padding:0 12px;gap:6px;font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;">
+            <i class="bi bi-funnel"></i> Recherche notes
+        </a>
         <button class="btn-icon" title="Ajouter une vidéo" onclick="openSearchModal()">
             <i class="bi bi-plus-lg"></i>
         </button>
@@ -557,23 +560,7 @@
             </div>
         </div>
 
-        <!-- Filtres avancés (code camarades — filtres.html) -->
-        <div class="filter-pane">
-            <div class="section-header">
-                <div class="pane-label">Filtres avancés</div>
-            </div>
-            <div class="filter-row">
-                <input type="text"  class="filter-input" id="filterTag"   placeholder="#hashtag" style="width:80px">
-                <input type="date"  class="filter-input" id="filterStart" style="width:110px">
-                <input type="date"  class="filter-input" id="filterEnd"   style="width:110px">
-                <button class="btn-filter" onclick="runFilter()">
-                    <i class="bi bi-search"></i>
-                </button>
-            </div>
-            <div id="filterResults">
-                <span style="font-size:.64rem">Recherchez vos notes par hashtag et plage de dates.</span>
-            </div>
-        </div>
+        
     </div>
 </div>
 
