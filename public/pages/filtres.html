@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>Mes Notes — W2G</title>
+    <style>
+        /* ── TOKENS (identiques aux autres pages) ── */
+        :root {
+            --bg:       #f4f5f7;
+            --surface:  #ffffff;
+            --surface2: #f0f2f5;
+            --border:   #e2e5eb;
+            --border2:  #cdd2da;
+            --navy:     #0f1f3d;
+            --navy2:    #1a3260;
+            --accent:   #2563eb;
+            --accent2:  #0ea5e9;
+            --accent3:  #f59e0b;
+            --success:  #10b981;
+            --danger:   #ef4444;
+            --text:     #0f1f3d;
+            --muted:    #64748b;
+            --mono:     'DM Mono', monospace;
+            --display:  'Syne', sans-serif;
+            --shadow:   0 1px 3px rgba(15,31,61,.07), 0 4px 12px rgba(15,31,61,.05);
+            --shadow-lg: 0 4px 24px rgba(15,31,61,.12);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--display);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── NAV ── */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 48px; height: 62px;
+            background: rgba(255,255,255,.92);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .nav-left  { display: flex; align-items: center; gap: 16px; }
+        .nav-right { display: flex; align-items: center; gap: 10px; }
+        .nav-logo {
+            font-family: var(--mono); font-size: 1.05rem; letter-spacing: .1em;
+            color: var(--navy); text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+        .nav-page-title {
+            font-family: var(--mono); font-size: .72rem; color: var(--muted);
+            letter-spacing: .08em;
+            padding: 4px 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        .btn-icon {
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--muted); width: 34px; height: 34px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: .9rem; transition: all .15s; text-decoration: none;
+        }
+        .btn-icon:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+        /* ── PAGE LAYOUT ── */
+        .page-wrapper {
+            flex: 1;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 24px 64px;
+        }
+
+        /* ── EN-TÊTE ── */
+        .page-header { margin-bottom: 36px; }
+        .page-eyebrow {
+            font-family: var(--mono); font-size: .7rem;
+            color: var(--accent); letter-spacing: .18em; text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .page-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--accent); display: block; }
+        .page-title {
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            font-weight: 800; letter-spacing: -.03em; color: var(--navy);
+            margin-bottom: 8px;
+        }
+        .page-sub {
+            font-family: var(--mono); font-size: .82rem; color: var(--muted); line-height: 1.6;
+        }
+
+        /* ── PANNEAU FILTRES ── */
+        .filter-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow);
+        }
+        .filter-panel-title {
+            font-family: var(--mono); font-size: .7rem;
+            letter-spacing: .12em; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .filter-panel-title::before {
+            content: ''; width: 5px; height: 5px;
+            border-radius: 50%; background: var(--accent); display: block;
+        }
+
+        .filter-row {
+            display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;
+        }
+
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-label {
+            font-family: var(--mono); font-size: .68rem;
+            letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+        }
+        .filter-input {
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); padding: 10px 14px;
+            border-radius: 8px; font-family: var(--mono); font-size: .82rem;
+            outline: none; transition: border-color .15s, box-shadow .15s;
+            min-width: 140px;
+        }
+        .filter-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+        .filter-input::placeholder { color: var(--border2); }
+        .filter-input[type="date"] { color-scheme: light; }
+
+        .btn-search {
+            background: var(--navy); color: #fff; border: none;
+            padding: 10px 24px; border-radius: 8px;
+            font-family: var(--display); font-weight: 700; font-size: .84rem;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: background .15s, transform .15s;
+            box-shadow: 0 2px 8px rgba(15,31,61,.2);
+            white-space: nowrap;
+        }
+        .btn-search:hover { background: var(--navy2); transform: translateY(-1px); }
+        .btn-search:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+        .btn-reset {
+            background: var(--bg); color: var(--muted); border: 1px solid var(--border);
+            padding: 10px 16px; border-radius: 8px;
+            font-family: var(--mono); font-size: .78rem;
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
+            transition: all .15s;
+        }
+        .btn-reset:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Indicateur de chargement (filtres.html) */
+        .loading-bar {
+            display: none;
+            align-items: center; gap: 10px;
+            font-family: var(--mono); font-size: .76rem; color: var(--accent);
+            margin-top: 16px; padding: 12px 16px;
+            background: rgba(37,99,235,.05);
+            border: 1px solid rgba(37,99,235,.15);
+            border-radius: 8px;
+        }
+        .loading-bar.visible { display: flex; }
+        .spinner {
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid rgba(37,99,235,.2);
+            border-top-color: var(--accent);
+            animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── STATS RAPIDES ── */
+        .results-meta {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .results-count {
+            font-family: var(--mono); font-size: .76rem; color: var(--muted);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .results-count strong { color: var(--navy); }
+        .results-tag-badge {
+            background: rgba(37,99,235,.08);
+            border: 1px solid rgba(37,99,235,.2);
+            color: var(--accent);
+            font-family: var(--mono); font-size: .7rem;
+            padding: 4px 10px; border-radius: 100px;
+        }
+
+        /* ── ZONE RÉSULTATS ── */
+        .results-zone { display: flex; flex-direction: column; gap: 16px; }
+
+        /* État vide / placeholder */
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+            border: 1px dashed var(--border2);
+            border-radius: 12px;
+            background: var(--surface);
+        }
+        .empty-icon { font-size: 2.5rem; color: var(--border2); margin-bottom: 16px; }
+        .empty-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 8px; }
+        .empty-sub { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+
+        /* ── NOTE CARD (structure de filtres.html) ── */
+        .note-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 10px 10px 0;
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            transition: box-shadow .15s, transform .15s;
+            animation: fadeUp .3s ease both;
+        }
+        .note-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+        .note-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+        }
+        .note-date {
+            font-family: var(--mono); font-size: .68rem; color: var(--muted);
+            display: flex; align-items: center; gap: 5px;
+        }
+        .note-date strong { color: var(--text); }
+        .note-hashtag {
+            font-family: var(--mono); font-size: .7rem; font-weight: 700;
+            color: var(--accent);
+            background: rgba(37,99,235,.08);
+            border: 1px solid rgba(37,99,235,.2);
+            padding: 3px 9px; border-radius: 100px;
+        }
+
+        .note-body {
+            font-family: var(--mono); font-size: .8rem;
+            color: var(--text); line-height: 1.7;
+            word-break: break-word;
+        }
+
+        /* Timecodes cliquables dans le contenu */
+        .note-body .tc {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(14,165,233,.08);
+            border: 1px solid rgba(14,165,233,.25);
+            color: var(--accent2); padding: 1px 7px; border-radius: 4px;
+            font-size: .72rem; text-decoration: none;
+            transition: background .12s;
+        }
+        .note-body .tc:hover { background: rgba(14,165,233,.18); }
+
+        /* Image capture (image_data de tableau.html) */
+        .note-image {
+            margin-top: 14px;
+        }
+        .note-image img {
+            max-width: 100%; border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(15,31,61,.1);
+            cursor: zoom-in;
+            transition: transform .15s;
+        }
+        .note-image img:hover { transform: scale(1.01); }
+
+        .note-footer {
+            margin-top: 14px; padding-top: 12px;
+            border-top: 1px solid var(--border);
+            display: flex; gap: 8px; flex-wrap: wrap;
+        }
+        .tag-pill {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: var(--mono); font-size: .65rem;
+            padding: 3px 8px; border-radius: 100px;
+            display: inline-flex; align-items: center; gap: 4px;
+            cursor: pointer; transition: all .12s;
+        }
+        .tag-pill:hover { border-color: var(--accent); color: var(--accent); background: rgba(37,99,235,.05); }
+
+        /* ── LIGHTBOX ── */
+        .lightbox {
+            display: none; position: fixed; inset: 0;
+            background: rgba(15,31,61,.82);
+            backdrop-filter: blur(6px);
+            z-index: 2000; align-items: center; justify-content: center;
+            cursor: zoom-out;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img {
+            max-width: 92vw; max-height: 88vh;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 24px 64px rgba(15,31,61,.4);
+        }
+        .lightbox-close {
+            position: absolute; top: 20px; right: 20px;
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--navy); width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: .9rem; transition: all .15s;
+        }
+        .lightbox-close:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border); padding: 24px 48px;
+            background: var(--surface);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 8px;
+        }
+        footer p { font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            .nav-bar { padding: 0 16px; }
+            .page-wrapper { padding: 24px 16px 48px; }
+            .filter-panel { padding: 20px 16px; }
+            .filter-row { flex-direction: column; align-items: stretch; }
+            .filter-input { min-width: unset; }
+            footer { padding: 16px; flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="nav-bar">
+    <div class="nav-left">
+        <a class="nav-logo" href="../index.html">
+            <div class="nav-logo-dot"></div>W2G
+        </a>
+        <span class="nav-page-title">Mes notes</span>
+    </div>
+    <div class="nav-right">
+        <a href="room.html" class="btn-icon" title="Retour à la room">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <a href="../index.html" class="btn-icon" title="Accueil">
+            <i class="bi bi-house"></i>
+        </a>
+    </div>
+</nav>
+
+<!-- ── CONTENU ── -->
+<div class="page-wrapper">
+
+    <!-- En-tête -->
+    <div class="page-header">
+        <div class="page-eyebrow">// recherche avancée</div>
+        <h1 class="page-title">Mes Notes</h1>
+        <p class="page-sub">
+            Retrouvez vos notes par hashtag et plage de dates.<br>
+            La recherche utilise une requête SQL <code style="font-family:var(--mono);font-size:.78rem;background:var(--surface2);padding:1px 6px;border-radius:4px;border:1px solid var(--border)">INNER JOIN + BETWEEN</code> sur la base de données.
+        </p>
+    </div>
+
+    <!-- ── PANNEAU FILTRES (logique filtres.html) ── -->
+    <div class="filter-panel">
+        <div class="filter-panel-title">Critères de recherche</div>
+
+        <div class="filter-row">
+            <!-- Hashtag (inputHashtag dans filtres.html) -->
+            <div class="filter-group" style="flex:1;min-width:160px;">
+                <label class="filter-label" for="inputHashtag">Hashtag</label>
+                <input
+                    type="text"
+                    id="inputHashtag"
+                    class="filter-input"
+                    value="#schema"
+                    placeholder="ex: #schema"
+                >
+            </div>
+
+            <!-- Date début (dateDebut dans filtres.html) -->
+            <div class="filter-group">
+                <label class="filter-label" for="dateDebut">Du</label>
+                <input type="date" id="dateDebut" class="filter-input">
+            </div>
+
+            <!-- Date fin (dateFin dans filtres.html) -->
+            <div class="filter-group">
+                <label class="filter-label" for="dateFin">Au</label>
+                <input type="date" id="dateFin" class="filter-input">
+            </div>
+
+            <!-- Boutons -->
+            <div class="filter-group" style="flex-direction:row;gap:8px;">
+                <button class="btn-search" id="btnSearch">
+                    <i class="bi bi-search"></i> Lancer la recherche SQL
+                </button>
+                <button class="btn-reset" id="btnReset" title="Réinitialiser">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Indicateur de chargement (filtres.html : "Execution de la requete...") -->
+        <div class="loading-bar" id="chargement">
+            <div class="spinner"></div>
+            Exécution de la requête (INNER JOIN + BETWEEN)…
+        </div>
+    </div>
+
+    <!-- Méta résultats -->
+    <div class="results-meta" id="resultsMeta" style="display:none;">
+        <div class="results-count">
+            <i class="bi bi-file-text" style="font-size:.8rem"></i>
+            <span id="resultsCountText"><strong>0</strong> note(s) trouvée(s)</span>
+        </div>
+        <div class="results-tag-badge" id="resultsTagBadge"></div>
+    </div>
+
+    <!-- ── ZONE RÉSULTATS (zoneResultats dans filtres.html) ── -->
+    <div id="zoneResultats">
+        <!-- État par défaut -->
+        <div class="empty-state" id="emptyDefault">
+            <div class="empty-icon"><i class="bi bi-funnel"></i></div>
+            <div class="empty-title">Lancez une recherche</div>
+            <div class="empty-sub">
+                Sélectionnez un hashtag et une plage de dates,<br>
+                puis cliquez sur "Lancer la recherche SQL".
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── LIGHTBOX ── -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <div class="lightbox-close" onclick="closeLightbox()">
+        <i class="bi bi-x-lg"></i>
+    </div>
+    <img id="lightboxImg" src="" alt="Capture agrandie">
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+    <p>© 2024 W2G — Watch Together.</p>
+    <p>Projet IL · Méthode Spirale</p>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// FILTRES AVANCÉS — logique exacte de filtres.html
+// Route : GET http://localhost:3002/api/search-dates
+//         ?tag=...&start=...&end=...
+// Requête SQL : INNER JOIN + BETWEEN (côté serveur)
+// ═══════════════════════════════════════════════════════
+
+// ── Pré-remplissage dates (plage raisonnable par défaut) ──
+(function () {
+    var today  = new Date();
+    var before = new Date();
+    before.setMonth(before.getMonth() - 2);
+
+    function fmt(d) {
+        return d.toISOString().split('T')[0];
+    }
+    document.getElementById('dateDebut').value = fmt(before);
+    document.getElementById('dateFin').value   = fmt(today);
+})();
+
+
+// ── Bouton Réinitialiser ──
+document.getElementById('btnReset').addEventListener('click', function () {
+    document.getElementById('inputHashtag').value = '#schema';
+    var today  = new Date();
+    var before = new Date();
+    before.setMonth(before.getMonth() - 2);
+    document.getElementById('dateDebut').value = before.toISOString().split('T')[0];
+    document.getElementById('dateFin').value   = today.toISOString().split('T')[0];
+    document.getElementById('zoneResultats').innerHTML = document.getElementById('emptyDefault')
+        ? '' : '';
+    reinitZone();
+    document.getElementById('resultsMeta').style.display = 'none';
+});
+
+function reinitZone() {
+    document.getElementById('zoneResultats').innerHTML =
+        '<div class="empty-state" id="emptyDefault">' +
+        '<div class="empty-icon"><i class="bi bi-funnel"></i></div>' +
+        '<div class="empty-title">Lancez une recherche</div>' +
+        '<div class="empty-sub">Sélectionnez un hashtag et une plage de dates,<br>puis cliquez sur "Lancer la recherche SQL".</div>' +
+        '</div>';
+}
+
+
+// ── Recherche principale (identique à filtres.html) ──
+document.getElementById('btnSearch').addEventListener('click', lancerRecherche);
+document.getElementById('inputHashtag').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') lancerRecherche();
+});
+
+async function lancerRecherche() {
+    var btn         = document.getElementById('btnSearch');
+    var chargement  = document.getElementById('chargement');
+    var zoneResultats = document.getElementById('zoneResultats');
+    var resultsMeta = document.getElementById('resultsMeta');
+
+    // ── Normalisation hashtag (filtres.html) ──
+    var hashtag  = document.getElementById('inputHashtag').value.trim();
+    var dateDebut = document.getElementById('dateDebut').value;
+    var dateFin   = document.getElementById('dateFin').value;
+
+    if (hashtag !== '' && !hashtag.startsWith('#')) {
+        hashtag = '#' + hashtag;
+    }
+
+    // UI loading
+    chargement.classList.add('visible');
+    zoneResultats.innerHTML = '';
+    resultsMeta.style.display = 'none';
+    btn.disabled = true;
+    btn.innerHTML = '<div style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite"></div> Recherche…';
+
+    try {
+        // ── URL identique à filtres.html — PORT 3002 ──
+        var url = 'http://localhost:3002/api/search-dates' +
+                  '?tag='    + encodeURIComponent(hashtag) +
+                  '&start='  + dateDebut +
+                  '&end='    + dateFin;
+
+        var response = await fetch(url);
+        var resultats = await response.json();
+
+        chargement.classList.remove('visible');
+
+        // ── Cas : aucun résultat (filtres.html) ──
+        if (!resultats || resultats.length === 0 || resultats.erreur) {
+            zoneResultats.innerHTML =
+                '<div class="empty-state">' +
+                '<div class="empty-icon"><i class="bi bi-inbox"></i></div>' +
+                '<div class="empty-title">Aucune note trouvée</div>' +
+                '<div class="empty-sub">Aucune note trouvée pour cette période dans la base de données.<br>' +
+                'Essayez un autre hashtag ou une plage de dates différente.</div>' +
+                '</div>';
+            return;
+        }
+
+        // ── Méta ──
+        document.getElementById('resultsCountText').innerHTML =
+            '<strong>' + resultats.length + '</strong> note' + (resultats.length > 1 ? 's' : '') + ' trouvée' + (resultats.length > 1 ? 's' : '');
+        document.getElementById('resultsTagBadge').textContent = hashtag;
+        resultsMeta.style.display = 'flex';
+
+        // ── Rendu note_card (structure filtres.html) ──
+        zoneResultats.innerHTML = '';
+
+        resultats.forEach(function (note, idx) {
+            // Date lisible (filtres.html : toLocaleString fr-FR)
+            var datePropre = new Date(note.created_at).toLocaleString('fr-FR');
+
+            // ── Image si présente (image_data de tableau.html) ──
+            var baliseImage = '';
+            if (note.image_data) {
+                baliseImage =
+                    '<div class="note-image">' +
+                    '<img src="' + note.image_data + '" ' +
+                         'alt="Capture du tableau" ' +
+                         'title="Cliquez pour agrandir" ' +
+                         'onclick="ouvrirLightbox(\'' + note.image_data.replace(/'/g, "\\'") + '\')">' +
+                    '</div>';
+            }
+
+            // ── Extraction hashtags du contenu (tag.js) pour les pills ──
+            var contenu      = note.contenu || '';
+            var tagsPresents = (contenu.match(/#[a-zA-Z0-9_]+/g) || []);
+            var pillsHtml    = tagsPresents.length > 0
+                ? '<div class="note-footer">' +
+                  tagsPresents.map(function (t) {
+                      return '<span class="tag-pill" onclick="filtrerParTag(\'' + t + '\')">' +
+                             '<i class="bi bi-hash" style="font-size:.6rem"></i>' + t.slice(1) +
+                             '</span>';
+                  }).join('') + '</div>'
+                : '';
+
+            // ── Rendu timecodes [|videoId:sec] cliquables ──
+            var contenuRendu = contenu.replace(/\[\|([^:]+):(\d+)\]/g, function (match, vid, sec) {
+                var mm = String(Math.floor(sec / 60)).padStart(2, '0');
+                var ss = String(sec % 60).padStart(2, '0');
+                return '<a class="tc" href="https://youtu.be/' + vid + '?t=' + sec +
+                       '" target="_blank"><i class="bi bi-clock" style="font-size:.6rem"></i> ' +
+                       mm + ':' + ss + '</a>';
+            });
+
+            // ── Card complète ──
+            var card = document.createElement('div');
+            card.className = 'note-card';
+            card.style.animationDelay = (idx * 0.05) + 's';
+            card.innerHTML =
+                '<div class="note-header">' +
+                    '<div class="note-date">' +
+                        '<i class="bi bi-calendar3" style="font-size:.7rem"></i>' +
+                        'Créé le : <strong>' + datePropre + '</strong>' +
+                    '</div>' +
+                    '<span class="note-hashtag">' + hashtag + '</span>' +
+                '</div>' +
+                '<div class="note-body">' + contenuRendu + '</div>' +
+                baliseImage +
+                pillsHtml;
+
+            zoneResultats.appendChild(card);
+        });
+
+    } catch (erreur) {
+        chargement.classList.remove('visible');
+        console.error('Erreur filtre :', erreur);
+        zoneResultats.innerHTML =
+            '<div class="empty-state">' +
+            '<div class="empty-icon" style="color:var(--danger)"><i class="bi bi-exclamation-triangle"></i></div>' +
+            '<div class="empty-title" style="color:var(--danger)">Erreur de connexion</div>' +
+            '<div class="empty-sub">Impossible de joindre le serveur PostgreSQL (port 3002).<br>' +
+            'Vérifiez que le serveur est démarré.</div>' +
+            '</div>';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-search"></i> Lancer la recherche SQL';
+    }
+}
+
+// ── Cliquer sur un tag-pill relance la recherche ──
+function filtrerParTag(tag) {
+    document.getElementById('inputHashtag').value = tag;
+    lancerRecherche();
+}
+
+// ── Lightbox ──
+function ouvrirLightbox(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lightboxImg').src = '';
+}
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLightbox();
+});
+</script>
+
+<script src="../assets/js/auth-nav.js"></script>
+</body>
+</html>
