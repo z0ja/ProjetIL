@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="../assets/css/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <title>Rejoindre une room — W2G</title>
+    <title>Créer une room — W2G</title>
     <style>
         :root {
             --bg:       #f4f5f7;
@@ -37,7 +37,7 @@
             flex-direction: column;
         }
 
-        /* ── Dot grid background ── */
+        /* Dot grid */
         body::before {
             content: '';
             position: fixed; inset: 0;
@@ -83,35 +83,31 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 48px 44px;
-            width: 100%; max-width: 440px;
+            width: 100%; max-width: 460px;
             box-shadow: var(--shadow-lg);
             animation: fadeUp .4s ease both;
         }
         @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 
-        /* Icône header */
         .card-icon {
             width: 52px; height: 52px;
-            background: rgba(37,99,235,.08);
-            border: 1px solid rgba(37,99,235,.18);
+            background: rgba(16,185,129,.08);
+            border: 1px solid rgba(16,185,129,.2);
             border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.4rem; color: var(--accent);
+            font-size: 1.4rem; color: var(--success);
             margin-bottom: 24px;
         }
-
         .card-eyebrow {
             font-family: var(--mono); font-size: .7rem;
-            color: var(--accent); letter-spacing: .16em; text-transform: uppercase;
+            color: var(--success); letter-spacing: .16em; text-transform: uppercase;
             margin-bottom: 8px;
             display: flex; align-items: center; gap: 8px;
         }
-        .card-eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--accent); display: block; }
-
+        .card-eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--success); display: block; }
         .card-title {
             font-size: 1.7rem; font-weight: 800;
-            letter-spacing: -.03em; color: var(--navy);
-            margin-bottom: 6px;
+            letter-spacing: -.03em; color: var(--navy); margin-bottom: 6px;
         }
         .card-sub {
             font-family: var(--mono); font-size: .78rem;
@@ -125,31 +121,26 @@
             font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
             color: var(--muted); margin-bottom: 8px;
         }
-
-        .field-input-wrap {
-            position: relative;
-        }
+        .field-input-wrap { position: relative; }
         .field-input-icon {
             position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
             color: var(--border2); font-size: .9rem; pointer-events: none;
             transition: color .15s;
         }
+        .field-input-wrap:focus-within .field-input-icon { color: var(--accent); }
         .field-input {
             width: 100%;
             background: var(--bg); border: 1px solid var(--border);
             color: var(--text); padding: 13px 14px 13px 40px;
-            font-family: var(--mono); font-size: 1rem; letter-spacing: .06em;
+            font-family: var(--mono); font-size: .9rem;
             border-radius: 8px; outline: none;
             transition: border-color .18s, box-shadow .18s;
         }
-        .field-input::placeholder { color: var(--border2); letter-spacing: .04em; }
+        .field-input::placeholder { color: var(--border2); }
         .field-input:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(37,99,235,.1);
         }
-        .field-input:focus + .field-input-icon,
-        .field-input-wrap:focus-within .field-input-icon { color: var(--accent); }
-        .field-input.is-error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
 
         /* ── BOUTON ── */
         .btn-submit {
@@ -162,26 +153,18 @@
             box-shadow: 0 2px 12px rgba(15,31,61,.22);
         }
         .btn-submit:hover { background: var(--navy2); transform: translateY(-1px); }
-        .btn-submit:active { transform: translateY(0); }
         .btn-submit:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 
-        /* ── MESSAGES ── */
-        #error {
-            min-height: 20px;
-            margin-top: 14px;
-            font-family: var(--mono); font-size: .76rem;
-            text-align: center; color: var(--danger);
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
+        /* ── ÉTATS ── */
 
-        /* State : connexion en cours */
-        .connecting-state {
+        /* Création en cours */
+        .creating-state {
             display: none;
             flex-direction: column; align-items: center; gap: 12px;
             padding: 16px 0;
             font-family: var(--mono); font-size: .76rem; color: var(--muted);
         }
-        .connecting-state.visible { display: flex; }
+        .creating-state.visible { display: flex; }
         .spinner {
             width: 28px; height: 28px; border-radius: 50%;
             border: 2px solid var(--border);
@@ -190,37 +173,87 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* State : succès */
-        .success-state {
+        /* ── PANNEAU ROOM CRÉÉE ── */
+        /* (room object reçu depuis index.js) */
+        .room-created-panel {
             display: none;
-            flex-direction: column; align-items: center; gap: 10px;
-            padding: 16px 0;
+            flex-direction: column; gap: 0;
+            animation: fadeUp .35s ease both;
         }
-        .success-state.visible { display: flex; }
-        .success-icon {
-            width: 44px; height: 44px; border-radius: 50%;
+        .room-created-panel.visible { display: flex; }
+
+        .room-created-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 20px;
+        }
+        .room-created-icon {
+            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
             background: rgba(16,185,129,.1);
-            border: 1px solid rgba(16,185,129,.3);
+            border: 1px solid rgba(16,185,129,.25);
             display: flex; align-items: center; justify-content: center;
-            color: var(--success); font-size: 1.2rem;
+            color: var(--success); font-size: 1.1rem;
         }
-        .success-msg {
-            font-family: var(--mono); font-size: .76rem; color: var(--success); text-align: center;
+        .room-created-title {
+            font-weight: 700; font-size: 1rem; color: var(--navy);
         }
+        .room-created-sub {
+            font-family: var(--mono); font-size: .72rem; color: var(--muted);
+        }
+
+        /* ID de la room (id="room-id" conservé pour le JS) */
+        .room-id-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .room-id-label {
+            font-family: var(--mono); font-size: .65rem;
+            letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+            margin-bottom: 4px;
+        }
+        #room-id {
+            font-family: var(--mono); font-size: 1.6rem;
+            font-weight: 500; letter-spacing: .12em; color: var(--navy);
+        }
+        .btn-copy {
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--muted); padding: 8px 12px; border-radius: 7px;
+            font-family: var(--mono); font-size: .7rem;
+            cursor: pointer; display: flex; align-items: center; gap: 5px;
+            transition: all .15s; white-space: nowrap; flex-shrink: 0;
+        }
+        .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-copy.copied { border-color: var(--success); color: var(--success); background: rgba(16,185,129,.06); }
+
+        /* Partage */
+        .share-hint {
+            font-family: var(--mono); font-size: .72rem; color: var(--muted);
+            text-align: center; margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+
+        /* Bouton entrer dans la room */
+        .btn-enter {
+            width: 100%; background: var(--success); color: #fff;
+            border: none; padding: 15px;
+            font-family: var(--display); font-weight: 700; font-size: .9rem;
+            border-radius: 8px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: opacity .18s, transform .18s;
+            box-shadow: 0 2px 12px rgba(16,185,129,.25);
+        }
+        .btn-enter:hover { opacity: .9; transform: translateY(-1px); }
 
         /* ── SÉPARATEUR ── */
-        .divider {
-            border: none; border-top: 1px solid var(--border);
-            margin: 28px 0;
-        }
-
+        .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
         .card-footer-link {
             text-align: center;
             font-family: var(--mono); font-size: .74rem; color: var(--muted);
         }
-        .card-footer-link a {
-            color: var(--accent); text-decoration: none; font-weight: 500;
-        }
+        .card-footer-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
         .card-footer-link a:hover { text-decoration: underline; }
 
         /* ── FOOTER ── */
@@ -248,7 +281,7 @@
     </a>
     <div class="nav-links">
         <a href="../index.html">Accueil</a>
-        <a href="room-make.html">Créer une room</a>
+        <a href="room-join.html">Rejoindre une room</a>
     </div>
 </nav>
 
@@ -256,55 +289,84 @@
 <main class="main">
     <div class="card">
 
-        <div class="card-icon"><i class="bi bi-link-45deg"></i></div>
-        <div class="card-eyebrow">Rejoindre</div>
-        <h1 class="card-title">Entrez l'ID de la room</h1>
-        <p class="card-sub">
-            Demandez l'ID à l'hôte et collez-le ci-dessous<br>pour rejoindre la session en cours.
-        </p>
+        <!-- ── ÉTAT 1 : Formulaire de création ── -->
+        <div id="formState">
+            <div class="card-icon"><i class="bi bi-plus-circle"></i></div>
+            <div class="card-eyebrow">Nouvelle session</div>
+            <h1 class="card-title">Créer une room</h1>
+            <p class="card-sub">
+                Donnez un nom à votre room, partagez l'ID généré<br>
+                à vos amis et regardez ensemble.
+            </p>
 
-        <!-- Formulaire (IDs conservés identiques pour le JS de vos camarades) -->
-        <form id="join-room-form" novalidate>
-            <div class="field-group">
-                <label class="field-label" for="room-name">ID de la room</label>
-                <div class="field-input-wrap">
-                    <input
-                        type="text"
-                        id="room-name"
-                        name="room-name"
-                        class="field-input"
-                        placeholder="Ex : 56792"
-                        autocomplete="off"
-                        required
-                    >
-                    <i class="bi bi-hash field-input-icon"></i>
+            <!-- Formulaire — id="create-room-form" conservé pour index.js -->
+            <form id="create-room-form" novalidate>
+                <div class="field-group">
+                    <label class="field-label" for="room-name">Nom de la room</label>
+                    <div class="field-input-wrap">
+                        <input
+                            type="text"
+                            id="room-name"
+                            name="room-name"
+                            class="field-input"
+                            placeholder="Ex : Soirée Films"
+                            autocomplete="off"
+                            required
+                        >
+                        <i class="bi bi-tv field-input-icon"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="bi bi-plus-lg"></i> Créer la room
+                </button>
+            </form>
+
+            <!-- Création en cours -->
+            <div class="creating-state" id="creatingState">
+                <div class="spinner"></div>
+                <span>Création de la room en cours…</span>
+            </div>
+
+            <hr class="divider">
+            <div class="card-footer-link">
+                Vous avez déjà un code ? <a href="room-join.html">Rejoindre une room →</a>
+            </div>
+        </div>
+
+        <!-- ── ÉTAT 2 : Room créée (room object reçu depuis index.js) ── -->
+        <div class="room-created-panel" id="roomCreatedPanel">
+
+            <div class="room-created-header">
+                <div class="room-created-icon"><i class="bi bi-check-lg"></i></div>
+                <div>
+                    <div class="room-created-title">Room créée avec succès !</div>
+                    <div class="room-created-sub">Partagez l'ID ci-dessous à vos participants.</div>
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit" id="submitBtn">
-                <i class="bi bi-arrow-right-circle"></i> Rejoindre
+            <!-- Boîte ID — id="room-id" conservé (rempli par socket 'room object') -->
+            <div class="room-id-box">
+                <div>
+                    <div class="room-id-label">ID de la room</div>
+                    <div id="room-id">—</div>
+                </div>
+                <button class="btn-copy" id="btnCopy" onclick="copyRoomId()">
+                    <i class="bi bi-clipboard"></i> Copier
+                </button>
+            </div>
+
+            <div class="share-hint">
+                <i class="bi bi-info-circle" style="font-size:.75rem"></i>
+                Communiquez cet ID à vos amis pour qu'ils puissent rejoindre.
+            </div>
+
+            <!-- Bouton entrer dans la room (redirige vers room.html) -->
+            <button class="btn-enter" id="btnEnterRoom" onclick="enterRoom()">
+                <i class="bi bi-arrow-right-circle"></i> Entrer dans la room
             </button>
-        </form>
-
-        <!-- Connexion en cours -->
-        <div class="connecting-state" id="connectingState">
-            <div class="spinner"></div>
-            <span>Connexion à la room en cours…</span>
         </div>
 
-        <!-- Succès -->
-        <div class="success-state" id="successState">
-            <div class="success-icon"><i class="bi bi-check-lg"></i></div>
-            <div class="success-msg">Room trouvée ! Redirection…</div>
-        </div>
-
-        <!-- Message d'erreur (id="error" conservé) -->
-        <div id="error"></div>
-
-        <hr class="divider">
-        <div class="card-footer-link">
-            Vous n'avez pas de code ? <a href="room-make.html">Créez votre propre room →</a>
-        </div>
     </div>
 </main>
 
@@ -314,75 +376,81 @@
     <p>Projet IL · Méthode Spirale</p>
 </footer>
 
-<!-- ── SCRIPTS (logique originale conservée intégralement) ── -->
+<!-- ── SCRIPTS ── -->
+<!-- Socket.IO depuis le serveur index.js (port 3004) -->
 <script src="http://localhost:3004/socket.io/socket.io.js"></script>
 <script>
     const socket = io(":3004");
-    const user   = JSON.parse(localStorage.getItem("user"));
-    let currentRoomId = null;
 
-    const form           = document.getElementById("join-room-form");
-    const input          = document.getElementById("room-name");
-    const submitBtn      = document.getElementById("submitBtn");
-    const errorDiv       = document.getElementById("error");
-    const connectingState = document.getElementById("connectingState");
-    const successState   = document.getElementById("successState");
+    const form          = document.getElementById("create-room-form");
+    const submitBtn     = document.getElementById("submitBtn");
+    const creatingState = document.getElementById("creatingState");
+    const formState     = document.getElementById("formState");
+    const roomCreated   = document.getElementById("roomCreatedPanel");
 
-    // ── Soumission du formulaire (logique originale) ──
+    // Stockage temporaire de l'objet room reçu de index.js
+    let _roomObject = null;
+
+    // ── Soumission du formulaire ──
+    // Émet "room creation" (roomName, userId) vers index.js
     form.addEventListener("submit", (e) => {
         e.preventDefault();
-        errorDiv.innerHTML = "";
-        input.classList.remove("is-error");
 
-        currentRoomId = input.value.trim();
-        if (!currentRoomId) {
-            showError("Veuillez entrer un ID de room.");
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user || !user.id) {
+            alert("Vous devez être connecté pour créer une room.");
+            window.location.href = "login.html";
             return;
         }
 
-        // UI : passage en état "connexion en cours"
-        form.style.display = "none";
-        connectingState.classList.add("visible");
+        const roomName = document.getElementById("room-name").value.trim();
+        if (!roomName) return;
 
-        socket.emit("user connect", currentRoomId, user.id);
+        // UI : passage en état "création en cours"
+        submitBtn.disabled = true;
+        creatingState.classList.add("visible");
+
+        // Événement attendu par index.js : socket.on('room creation', (roomName, userId) => {...})
+        socket.emit("room creation", roomName, user.id);
     });
 
-    // ── Aucune room trouvée (socket original) ──
-    socket.on('no id', (userId) => {
-        if (userId == user.id) {
-            // Retour au formulaire avec message d'erreur
-            connectingState.classList.remove("visible");
-            form.style.display = "block";
-            input.classList.add("is-error");
-            showError("Cette ID ne correspond à aucune room.");
-        }
-    });
+    // ── Réception de la room créée ──
+    // index.js émet : socket.emit('room object', room, room.listeParticipants)
+    socket.on('room object', (room, listeParticipant) => {
+        _roomObject = room;
 
-    // ── Room acceptée (socket original) ──
-    socket.on('accepted', (room, userId, listeParticipant) => {
+        // Stocker roomObject dans localStorage
+        // (utilisé par VideoPlayer.isAdmin(), sendState(), etc.)
         localStorage.setItem('roomObject', JSON.stringify(room));
         localStorage.setItem('listeParticipant', JSON.stringify(listeParticipant));
 
-        // UI : succès avant redirection
-        connectingState.classList.remove("visible");
-        successState.classList.add("visible");
+        // Afficher l'ID de la room (id="room-id" conservé du fichier original)
+        document.getElementById('room-id').textContent = room.id;
 
-        setTimeout(() => {
-            window.location.href = "./room.html";
-        }, 800);
+        // Passer à l'état 2 : room créée
+        creatingState.classList.remove("visible");
+        formState.style.display = "none";
+        roomCreated.classList.add("visible");
     });
 
-    // ── Helpers UI ──
-    function showError(msg) {
-        errorDiv.innerHTML =
-            '<i class="bi bi-exclamation-circle"></i> ' + msg;
+    // ── Copier l'ID dans le presse-papier ──
+    function copyRoomId() {
+        const id = document.getElementById('room-id').textContent;
+        navigator.clipboard.writeText(id).then(() => {
+            const btn = document.getElementById('btnCopy');
+            btn.classList.add('copied');
+            btn.innerHTML = '<i class="bi bi-check-lg"></i> Copié !';
+            setTimeout(() => {
+                btn.classList.remove('copied');
+                btn.innerHTML = '<i class="bi bi-clipboard"></i> Copier';
+            }, 2000);
+        });
     }
 
-    // Reset visuel si l'utilisateur retape dans le champ
-    input.addEventListener("input", () => {
-        input.classList.remove("is-error");
-        errorDiv.innerHTML = "";
-    });
+    // ── Entrer dans la room (admin) ──
+    function enterRoom() {
+        window.location.href = "./room.html";
+    }
 </script>
 
 <script src="../assets/js/auth-nav.js"></script>
